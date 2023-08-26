@@ -1,0 +1,13 @@
+----------------------------------------------------------------
+Sat Aug 26 20:43:07 CST 2023:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance a816c00e-018a-31de-9b29-0000195adb40 
+on database directory E:\codesoft\ideaProjects\qq_robot_microservice\nacos\data\derby-data with class loader org.springframework.boot.loader.LaunchedURLClassLoader@7e0b37bc 
+Loaded from jar:file:/E:/codesoft/ideaProjects/qq_robot_microservice/nacos/target/nacos-server.jar!/BOOT-INF/lib/derby-10.14.2.0.jar!/
+java.vendor=Oracle Corporation
+java.runtime.version=19.0.2+7-44
+user.dir=E:\codesoft\ideaProjects\qq_robot_microservice
+os.name=Windows 10
+os.arch=amd64
+os.version=10.0
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
