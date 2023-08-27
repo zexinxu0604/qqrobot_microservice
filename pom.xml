@@ -9,6 +9,7 @@
         <module>message_service_1</module>
         <module>gateway_server</module>
         <module>message_service_2</module>
+        <module>group_image_service_1</module>
     </modules>
     <groupId>org.xzx</groupId>
     <artifactId>qq_robot_microservice</artifactId>

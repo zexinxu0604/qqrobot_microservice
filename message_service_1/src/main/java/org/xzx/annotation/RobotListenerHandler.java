@@ -26,4 +26,6 @@ public @interface RobotListenerHandler {
      */
     boolean concurrency() default false;
 
+    boolean isBlock() default false;
+
 }

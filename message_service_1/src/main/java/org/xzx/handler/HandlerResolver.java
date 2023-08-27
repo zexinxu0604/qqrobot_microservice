@@ -71,8 +71,12 @@ public class HandlerResolver {
 
     public static void handleEvent(Message message) {
         handlers.keySet().forEach(messageClazz -> {
+            final boolean[] shouldExitLoop = {false}; // 标志变量，用于跳出循环
             if (messageClazz.isAssignableFrom(message.getClass())) {
                 handlers.get(messageClazz).forEach(handler -> {
+                    if (shouldExitLoop[0]) {
+                        return; // 如果标志为true，直接退出循环
+                    }
                     if (handler.annotation().concurrency()) {
                         new Thread(() -> {
                             if (message instanceof Received_Group_Message receivedGroupMessage) {
@@ -83,6 +87,9 @@ public class HandlerResolver {
                                 handler.accept(message);
                             }
                         }, "robot-handler-" + System.currentTimeMillis()).start();
+                        if (handler.annotation().isBlock()) {
+                            shouldExitLoop[0] = true; // 设置标志为true，以便在下一次循环时退出
+                        }
                     } else {
                         if (message instanceof Received_Group_Message receivedGroupMessage) {
                             handler.acceptIfContainsId(receivedGroupMessage.getGroup_id(), receivedGroupMessage);
@@ -90,6 +97,9 @@ public class HandlerResolver {
                             handler.acceptIfContainsId(receivedPrivateMessage.getSender().getUser_id(), receivedPrivateMessage);
                         } else {
                             handler.accept(message);
+                        }
+                        if (handler.annotation().isBlock()) {
+                            shouldExitLoop[0] = true; // 设置标志为true，以便在下一次循环时退出
                         }
                     }
                 });
