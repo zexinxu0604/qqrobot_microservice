@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.xzx.dao.GroupImageDao;
 import org.xzx.pojo.GroupImage;
+import org.xzx.utils.String_Utils;
 
 import java.util.List;
 
@@ -43,5 +44,13 @@ public class GroupImageService {
         QueryWrapper<GroupImage> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("localurl", localUrl);
         return groupImageDao.selectOne(queryWrapper);
+    }
+
+    public boolean insertImage(String url){
+        GroupImage groupImage = new GroupImage();
+        groupImage.setUrl(url);
+        groupImage.setLocalurl(String_Utils.getImageName(url));
+        groupImage.setIsDel(0);
+        return groupImageDao.insert(groupImage) == 1;
     }
 }
