@@ -53,4 +53,12 @@ public class GroupImageService {
         groupImage.setIsDel(0);
         return groupImageDao.insert(groupImage) == 1;
     }
+
+    public boolean deleteImage(String url){
+        QueryWrapper<GroupImage> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("url", url);
+        GroupImage groupImage = groupImageDao.selectOne(queryWrapper);
+        groupImage.setIsDel(1);
+        return groupImageDao.updateById(groupImage) == 1;
+    }
 }

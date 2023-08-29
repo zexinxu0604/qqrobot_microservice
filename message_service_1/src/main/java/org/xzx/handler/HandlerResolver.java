@@ -3,6 +3,9 @@ package org.xzx.handler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.stereotype.Component;
 import org.xzx.annotation.RobotListenerHandler;
 import org.xzx.pojo.messageBean.Message;
 import org.xzx.pojo.messageBean.Received_Group_Message;
@@ -24,10 +27,14 @@ public class HandlerResolver {
     private static final Map<Class<? extends Message>, PriorityQueue<EventHandler>> handlers = new HashMap<>();
     private final Logger logger = LoggerFactory.getLogger(HandlerResolver.class);
 
+    private static ThreadPoolTaskExecutor threadPoolTaskExecutor = null;
+
+
     public HandlerResolver(Object bean, BeanFactory factory, Method... declaredMethods) {
         this.bean = bean;
         this.factory = factory;
         this.declaredMethods = declaredMethods;
+        threadPoolTaskExecutor = (ThreadPoolTaskExecutor) factory.getBean("taskExecutor");
         this.resolve();
     }
 
@@ -71,14 +78,10 @@ public class HandlerResolver {
 
     public static void handleEvent(Message message) {
         handlers.keySet().forEach(messageClazz -> {
-            final boolean[] shouldExitLoop = {false}; // 标志变量，用于跳出循环
             if (messageClazz.isAssignableFrom(message.getClass())) {
                 handlers.get(messageClazz).forEach(handler -> {
-                    if (shouldExitLoop[0]) {
-                        return; // 如果标志为true，直接退出循环
-                    }
                     if (handler.annotation().concurrency()) {
-                        new Thread(() -> {
+                        threadPoolTaskExecutor.execute(() -> {
                             if (message instanceof Received_Group_Message receivedGroupMessage) {
                                 handler.acceptIfContainsId(receivedGroupMessage.getGroup_id(), receivedGroupMessage);
                             } else if (message instanceof Received_Private_Message receivedPrivateMessage) {
@@ -86,10 +89,7 @@ public class HandlerResolver {
                             } else {
                                 handler.accept(message);
                             }
-                        }, "robot-handler-" + System.currentTimeMillis()).start();
-                        if (handler.annotation().isBlock()) {
-                            shouldExitLoop[0] = true; // 设置标志为true，以便在下一次循环时退出
-                        }
+                        });
                     } else {
                         if (message instanceof Received_Group_Message receivedGroupMessage) {
                             handler.acceptIfContainsId(receivedGroupMessage.getGroup_id(), receivedGroupMessage);
@@ -97,9 +97,6 @@ public class HandlerResolver {
                             handler.acceptIfContainsId(receivedPrivateMessage.getSender().getUser_id(), receivedPrivateMessage);
                         } else {
                             handler.accept(message);
-                        }
-                        if (handler.annotation().isBlock()) {
-                            shouldExitLoop[0] = true; // 设置标志为true，以便在下一次循环时退出
                         }
                     }
                 });
