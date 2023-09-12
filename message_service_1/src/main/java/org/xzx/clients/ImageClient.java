@@ -17,4 +17,7 @@ public interface ImageClient {
 
     @GetMapping("/image/deleteImage")
     boolean deleteImage(@RequestParam String url);
+
+    @GetMapping("/image/restoreImage")
+    boolean restoreImage(@RequestParam String url);
 }

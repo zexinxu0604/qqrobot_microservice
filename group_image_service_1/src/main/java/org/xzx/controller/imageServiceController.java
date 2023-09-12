@@ -72,4 +72,10 @@ public class imageServiceController {
     public boolean deleteImage(String url) {
         return groupImageService.deleteImage(url);
     }
+
+    @GetMapping("/image/restoreImage")
+    @ResponseBody
+    public boolean restoreImage(String url) {
+        return groupImageService.restoreImage(url);
+    }
 }

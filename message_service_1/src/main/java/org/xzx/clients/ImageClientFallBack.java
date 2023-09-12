@@ -25,4 +25,10 @@ public class ImageClientFallBack implements ImageClient{
     public boolean deleteImage(String url) {
         return false;
     }
+
+    @Override
+    public boolean restoreImage(String url) {
+        return false;
+    }
+
 }

@@ -55,10 +55,21 @@ public class GroupImageService {
     }
 
     public boolean deleteImage(String url){
+        System.out.println(url);
+        String name = String_Utils.getImageName(url);
         QueryWrapper<GroupImage> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("url", url);
+        queryWrapper.like("url", name + "/0?term=2");
         GroupImage groupImage = groupImageDao.selectOne(queryWrapper);
         groupImage.setIsDel(1);
+        return groupImageDao.updateById(groupImage) == 1;
+    }
+
+    public boolean restoreImage(String url){
+        String name = String_Utils.getImageName(url);
+        QueryWrapper<GroupImage> queryWrapper = new QueryWrapper<>();
+        queryWrapper.like("url", name + "/0?term=2");
+        GroupImage groupImage = groupImageDao.selectOne(queryWrapper);
+        groupImage.setIsDel(0);
         return groupImageDao.updateById(groupImage) == 1;
     }
 }

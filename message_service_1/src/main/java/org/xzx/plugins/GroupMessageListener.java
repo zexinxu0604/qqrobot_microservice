@@ -8,6 +8,7 @@ import org.xzx.annotation.RobotListener;
 import org.xzx.annotation.RobotListenerHandler;
 import org.xzx.clients.ImageClient;
 import org.xzx.clients.Jx3Clients;
+import org.xzx.pojo.Image.ImageResponse;
 import org.xzx.pojo.messageBean.Received_Group_Message;
 import org.xzx.service.Gocq_service;
 import org.xzx.utils.CQ_Utils;
@@ -30,13 +31,6 @@ public class GroupMessageListener {
     @Value("${qq.number}")
     private long qq;
 
-    @RobotListenerHandler
-    public void random(Received_Group_Message message) {
-        if (message.getRaw_message().equals(CQ_Utils.getAtString(qq)) || message.getRaw_message().equals(CQ_Utils.getAtString(qq) + " ")) {
-            System.out.println(imageClient.getRandomImage());
-        }
-    }
-
     @RobotListenerHandler(concurrency = true)
     public void getBaiZhan(Received_Group_Message message) {
         if (message.getRaw_message().equals("百战")) {
@@ -46,7 +40,7 @@ public class GroupMessageListener {
         }
     }
 
-    @RobotListenerHandler(order = 0)
+    @RobotListenerHandler
     public void checkImage(Received_Group_Message receivedGroupMessage) {
         if (receivedGroupMessage.getRaw_message().startsWith("[CQ:image,")) {
             List<String> cqStrings = String_Utils.getCQStrings(receivedGroupMessage.getRaw_message());
@@ -85,7 +79,7 @@ public class GroupMessageListener {
                     } else {
                         gocqService.send_group_message(group_id, "找到原图片成功但，删除失败");
                     }
-                } catch(Exception e){
+                } catch (Exception e) {
                     gocqService.send_group_message(group_id, "删除失败");
                 }
 
@@ -93,4 +87,45 @@ public class GroupMessageListener {
         }
     }
 
+    @RobotListenerHandler
+    public void restoreImage(Received_Group_Message receivedGroupMessage) {
+        int group_id = receivedGroupMessage.getGroup_id();
+        if (receivedGroupMessage.getRaw_message().startsWith("[CQ:reply,") && receivedGroupMessage.getRaw_message().endsWith("恢复图片")) {
+            List<String> cqStrings = String_Utils.getCQStrings(receivedGroupMessage.getRaw_message());
+            String atPerson = cqStrings.get(1);
+            long atQQ = Long.parseLong(String_Utils.getQQFromAt(atPerson));
+            if (atQQ == qq) {
+                String replycq = cqStrings.get(0);
+                int messageid = Integer.parseInt(String_Utils.getIdFromReply(replycq));
+                try {
+                    JsonNode jsonNode = gocqService.get_message(messageid);
+                    String raw_message = jsonNode.get("data").get("message").asText();
+                    List<String> raw_cq_string = String_Utils.getCQStrings(raw_message);
+                    String raw_picture_url = String_Utils.getImageURL(raw_cq_string.get(0));
+                    if (imageClient.restoreImage(raw_picture_url)) {
+                        gocqService.send_group_message(group_id, "已恢复");
+                    } else {
+                        gocqService.send_group_message(group_id, "找到原图片成功但，恢复失败");
+                    }
+                } catch (Exception e) {
+                    gocqService.send_group_message(group_id, "恢复失败");
+                }
+
+            }
+        }
+    }
+
+    @RobotListenerHandler
+    public void getRandomImage(Received_Group_Message receivedGroupMessage) {
+        if (receivedGroupMessage.getRaw_message().equals(CQ_Utils.getAtString(qq)) || receivedGroupMessage.getRaw_message().equals(CQ_Utils.getAtString(qq) + " ")) {
+            ImageResponse imageResponse = imageClient.getRandomImage();
+            System.out.println(imageResponse.getUrl());
+            if(imageResponse.getType() == 0){
+                gocqService.send_group_message(receivedGroupMessage.getGroup_id(), CQ_Utils.getImageString(imageResponse.getUrl()));
+            } else {
+                gocqService.send_group_message(receivedGroupMessage.getGroup_id(), CQ_Utils.getImageString(CQ_Utils.getlocalImageUrl(imageResponse.getUrl())));
+            }
+        }
+    }
 }
+
