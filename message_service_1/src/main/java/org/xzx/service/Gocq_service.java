@@ -23,7 +23,6 @@ public class Gocq_service {
     }
 
     public JsonNode get_message(int message_id){
-        JsonNode jsonNode = restTemplate.getForObject("http://127.0.0.1:5700/get_msg?message_id=" + message_id, JsonNode.class);
-        return jsonNode;
+        return restTemplate.getForObject("http://127.0.0.1:5700/get_msg?message_id=" + message_id, JsonNode.class);
     }
 }

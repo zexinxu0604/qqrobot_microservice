@@ -58,4 +58,12 @@ public class String_Utils {
     public static String getImageSubType(String str) {
         return str.substring(str.indexOf("subType=") + 8, str.indexOf(",url="));
     }
+
+    public static String getIdFromReply(String str) {
+        return str.substring(str.indexOf("id=") + 3, str.indexOf("]"));
+    }
+
+    public static String getQQFromAt(String str) {
+        return str.substring(str.indexOf("qq=") + 3, str.indexOf("]"));
+    }
 }

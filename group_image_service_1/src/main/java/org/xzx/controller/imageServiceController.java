@@ -46,7 +46,7 @@ public class imageServiceController {
     /**
      * 检查是否存在该图片，如果不存在则下载
      * @param url
-     * @return 0(已存在) 1(下载成功)
+     * @return 0(已存在) 1(下载成功) 2(下载失败)
      */
     @GetMapping("/image/checkUrl")
     @ResponseBody
@@ -55,8 +55,9 @@ public class imageServiceController {
         if (groupImageService.isImageExist(imageName)) {
             return 0;
         } else {
-            groupImageService.insertImage(url);;
-            return url_utils.downloadImage(url, imagepath + imageName) ? 1 : 2;
+            groupImageService.insertImage(url);
+            System.out.println("开始下载图片");
+            return url_utils.downloadImage(url, imagepath + imageName + ".png") ? 1 : 2;
         }
     }
 

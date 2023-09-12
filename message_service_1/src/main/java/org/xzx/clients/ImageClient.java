@@ -4,7 +4,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 import org.xzx.pojo.Image.ImageResponse;
 
-@FeignClient("group-image-service")
+@FeignClient(name = "group-image-service", fallback = ImageClientFallBack.class)
 public interface ImageClient {
     @RequestMapping("/getRandomImage")
     ImageResponse getRandomImage();
