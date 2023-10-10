@@ -3,14 +3,11 @@ package org.xzx.handler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.stereotype.Component;
 import org.xzx.annotation.RobotListenerHandler;
 import org.xzx.pojo.messageBean.Message;
 import org.xzx.pojo.messageBean.Received_Group_Message;
 import org.xzx.pojo.messageBean.Received_Private_Message;
-import org.xzx.pojo.messageBean.Send_Message.Group_Message;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;

@@ -46,10 +46,12 @@ public class GroupImageService {
         return groupImageDao.selectOne(queryWrapper);
     }
 
-    public boolean insertImage(String url){
+    public boolean insertImage(String url, long poster, long groupid){
         GroupImage groupImage = new GroupImage();
         groupImage.setUrl(url);
+        groupImage.setPoster(poster);
         groupImage.setLocalurl(String_Utils.getImageName(url));
+        groupImage.setGroupid(groupid);
         groupImage.setIsDel(0);
         return groupImageDao.insert(groupImage) == 1;
     }

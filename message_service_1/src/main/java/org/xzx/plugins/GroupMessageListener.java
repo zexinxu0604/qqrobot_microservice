@@ -45,11 +45,13 @@ public class GroupMessageListener {
         if (receivedGroupMessage.getRaw_message().startsWith("[CQ:image,")) {
             List<String> cqStrings = String_Utils.getCQStrings(receivedGroupMessage.getRaw_message());
             String imagecq = cqStrings.get(0);
+            long poster = receivedGroupMessage.getUser_id();
+            long group_id = receivedGroupMessage.getGroup_id();
             if (String_Utils.getImageSubType(imagecq).equals("1")) {
                 String imageUrl = String_Utils.getImageURL(imagecq);
-                if (imageClient.checkUrl(imageUrl) == 1) {
+                if (imageClient.checkUrl(imageUrl, poster, group_id) == 1) {
                     gocqService.send_group_message(receivedGroupMessage.getGroup_id(), "没见过，偷了");
-                } else if (imageClient.checkUrl(imageUrl) == 2) {
+                } else if (imageClient.checkUrl(imageUrl, poster, group_id) == 2) {
                     gocqService.send_group_message(receivedGroupMessage.getGroup_id(), "没见过，但没偷成");
                 }
             }

@@ -50,12 +50,12 @@ public class imageServiceController {
      */
     @GetMapping("/image/checkUrl")
     @ResponseBody
-    public int checkUrl(String url) {
+    public int checkUrl(String url, long poster, long groupid) {
         String imageName = String_Utils.getImageName(url);
         if (groupImageService.isImageExist(imageName)) {
             return 0;
         } else {
-            groupImageService.insertImage(url);
+            groupImageService.insertImage(url, poster, groupid);
             System.out.println("开始下载图片");
             return url_utils.downloadImage(url, imagepath + imageName + ".png") ? 1 : 2;
         }
@@ -63,8 +63,8 @@ public class imageServiceController {
 
     @GetMapping("/image/insertImage")
     @ResponseBody
-    public boolean insertImage(String url) {
-        return groupImageService.insertImage(url);
+    public boolean insertImage(String url, long poster, long groupid) {
+        return groupImageService.insertImage(url, poster, groupid);
     }
 
     @GetMapping("/image/deleteImage")

@@ -9,7 +9,6 @@
     </parent>
     <groupId>com.xzx.gateway</groupId>
     <artifactId>gateway_server</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
     <name>gateway_server</name>
     <description>gateway_server</description>
     <properties>
@@ -52,5 +51,14 @@
         </dependency>
 
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

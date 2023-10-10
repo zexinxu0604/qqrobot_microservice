@@ -3,6 +3,7 @@ package org.xzx.handler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.xzx.annotation.RobotListenerHandler;
 import org.xzx.pojo.messageBean.Message;
 import org.xzx.pojo.messageBean.Received_Group_Message;
@@ -23,10 +24,14 @@ public class HandlerResolver {
     private static final Map<Class<? extends Message>, PriorityQueue<EventHandler>> handlers = new HashMap<>();
     private final Logger logger = LoggerFactory.getLogger(HandlerResolver.class);
 
+    private static ThreadPoolTaskExecutor threadPoolTaskExecutor = null;
+
+
     public HandlerResolver(Object bean, BeanFactory factory, Method... declaredMethods) {
         this.bean = bean;
         this.factory = factory;
         this.declaredMethods = declaredMethods;
+        threadPoolTaskExecutor = (ThreadPoolTaskExecutor) factory.getBean("taskExecutor");
         this.resolve();
     }
 
@@ -73,7 +78,7 @@ public class HandlerResolver {
             if (messageClazz.isAssignableFrom(message.getClass())) {
                 handlers.get(messageClazz).forEach(handler -> {
                     if (handler.annotation().concurrency()) {
-                        new Thread(() -> {
+                        threadPoolTaskExecutor.execute(() -> {
                             if (message instanceof Received_Group_Message receivedGroupMessage) {
                                 handler.acceptIfContainsId(receivedGroupMessage.getGroup_id(), receivedGroupMessage);
                             } else if (message instanceof Received_Private_Message receivedPrivateMessage) {
@@ -81,7 +86,7 @@ public class HandlerResolver {
                             } else {
                                 handler.accept(message);
                             }
-                        }, "robot-handler-" + System.currentTimeMillis()).start();
+                        });
                     } else {
                         if (message instanceof Received_Group_Message receivedGroupMessage) {
                             handler.acceptIfContainsId(receivedGroupMessage.getGroup_id(), receivedGroupMessage);

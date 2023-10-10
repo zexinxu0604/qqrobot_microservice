@@ -24,13 +24,13 @@ public class GroupImage {
     private String url;
 
     @TableField("poster")
-    private int poster;
+    private long poster;
 
     @TableField("isDel")
     private int isDel;
 
     @TableField("groupid")
-    private int groupid;
+    private long groupid;
 
     @TableField("localurl")
     private String localurl;
