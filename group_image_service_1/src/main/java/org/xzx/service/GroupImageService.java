@@ -2,11 +2,15 @@ package org.xzx.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.xzx.dao.GroupImageDao;
 import org.xzx.pojo.GroupImage;
 import org.xzx.utils.String_Utils;
+import org.xzx.utils.Url_utils;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @Service
@@ -14,6 +18,12 @@ public class GroupImageService {
 
     @Autowired
     private GroupImageDao groupImageDao;
+
+    @Autowired
+    private Url_utils url_utils;
+
+    @Value("${qq.group.imagePath}")
+    private String imagepath;
 
     /**
      *
@@ -74,4 +84,14 @@ public class GroupImageService {
         groupImage.setIsDel(0);
         return groupImageDao.updateById(groupImage) == 1;
     }
+
+    public boolean checkLocalPathExist(String localPath){
+        Path path = Paths.get(imagepath + localPath + ".png");
+        return path.toFile().exists();
+    }
+
+    public boolean downloadImageFromUrl(String url, String imageName){
+        return url_utils.downloadImage(url, imagepath + imageName);
+    }
+
 }

@@ -6,8 +6,8 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.xzx.annotation.RobotListenerHandler;
 import org.xzx.pojo.messageBean.Message;
-import org.xzx.pojo.messageBean.Received_Group_Message;
-import org.xzx.pojo.messageBean.Received_Private_Message;
+import org.xzx.pojo.messageBean.ReceivedGroupMessage;
+import org.xzx.pojo.messageBean.ReceivedPrivateMessage;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -47,7 +47,7 @@ public class HandlerResolver {
     private Class<? extends Message> methodEvent(Method method) {
         Parameter[] parameters = method.getParameters();
         if (parameters.length < 1 || parameters[0].getType().isAssignableFrom(Message.class))
-            throw new IllegalArgumentException("监听器Handler方法的第一个参数必须是Event及其子类型!");
+            throw new IllegalArgumentException("监听器Handler方法的第一个参数必须是Message及其子类型!");
         return parameters[0].getType().asSubclass(Message.class);
     }
 
@@ -79,18 +79,18 @@ public class HandlerResolver {
                 handlers.get(messageClazz).forEach(handler -> {
                     if (handler.annotation().concurrency()) {
                         threadPoolTaskExecutor.execute(() -> {
-                            if (message instanceof Received_Group_Message receivedGroupMessage) {
+                            if (message instanceof ReceivedGroupMessage receivedGroupMessage) {
                                 handler.acceptIfContainsId(receivedGroupMessage.getGroup_id(), receivedGroupMessage);
-                            } else if (message instanceof Received_Private_Message receivedPrivateMessage) {
+                            } else if (message instanceof ReceivedPrivateMessage receivedPrivateMessage) {
                                 handler.acceptIfContainsId(receivedPrivateMessage.getSender().getUser_id(), receivedPrivateMessage);
                             } else {
                                 handler.accept(message);
                             }
                         });
                     } else {
-                        if (message instanceof Received_Group_Message receivedGroupMessage) {
+                        if (message instanceof ReceivedGroupMessage receivedGroupMessage) {
                             handler.acceptIfContainsId(receivedGroupMessage.getGroup_id(), receivedGroupMessage);
-                        } else if (message instanceof Received_Private_Message receivedPrivateMessage) {
+                        } else if (message instanceof ReceivedPrivateMessage receivedPrivateMessage) {
                             handler.acceptIfContainsId(receivedPrivateMessage.getSender().getUser_id(), receivedPrivateMessage);
                         } else {
                             handler.accept(message);

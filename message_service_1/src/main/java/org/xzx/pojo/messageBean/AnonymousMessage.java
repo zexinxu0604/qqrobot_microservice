@@ -17,7 +17,7 @@ flag    匿名用户 flag, 在调用禁言 API 时需要传入
 @AllArgsConstructor
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class anonymous_Message {
+public class AnonymousMessage {
     private int id;
 
     private String name;

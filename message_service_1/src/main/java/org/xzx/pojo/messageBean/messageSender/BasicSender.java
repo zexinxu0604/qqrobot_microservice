@@ -8,14 +8,18 @@ import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 @Data
-@ToString(callSuper = true)
-@AllArgsConstructor
+@ToString
 @SuperBuilder
+@AllArgsConstructor
 @NoArgsConstructor
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class private_Message_Sender extends basic_Sender{
+public class BasicSender {
+    private int user_id;
 
-    private int group_id = 0;
+    private String nickname;
 
+    private String sex;
+
+    private int age;
 }

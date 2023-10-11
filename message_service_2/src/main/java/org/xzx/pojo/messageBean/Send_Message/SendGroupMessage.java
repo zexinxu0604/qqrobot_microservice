@@ -7,14 +7,14 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Group_Message {
+public class SendGroupMessage {
     private int group_id;
 
     private String message;
 
     private boolean auto_escape = false;
 
-    public Group_Message(int groupId, String message) {
+    public SendGroupMessage(int groupId, String message) {
         this.group_id = groupId;
         this.message = message;
     }

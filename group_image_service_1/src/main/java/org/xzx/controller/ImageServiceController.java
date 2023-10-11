@@ -14,7 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Controller
-public class imageServiceController {
+public class ImageServiceController {
 
     @Autowired
     private GroupImageService groupImageService;
@@ -22,8 +22,6 @@ public class imageServiceController {
     @Autowired
     private Url_utils url_utils;
 
-    @Value("${qq.group.imagepath}")
-    private String imagepath;
 
     @RequestMapping("/getRandomImage")
     @ResponseBody
@@ -33,8 +31,7 @@ public class imageServiceController {
         if (url_utils.checkUrl(url)) {
             return new ImageResponse(200, 0, url);
         } else {
-            Path path = Paths.get(imagepath + groupImage.getLocalurl() + ".png");
-            if (path.toFile().exists()) {
+            if (groupImageService.checkLocalPathExist(groupImage.getLocalurl())) {
                 return new ImageResponse(200, 1, groupImage.getLocalurl());
             } else {
                 groupImageService.deleteImage(url);
@@ -43,6 +40,7 @@ public class imageServiceController {
         }
     }
 
+    //TODO: 重构下载图片的代码，判断图片类型
     /**
      * 检查是否存在该图片，如果不存在则下载
      * @param url
@@ -57,7 +55,7 @@ public class imageServiceController {
         } else {
             groupImageService.insertImage(url, poster, groupid);
             System.out.println("开始下载图片");
-            return url_utils.downloadImage(url, imagepath + imageName + ".png") ? 1 : 2;
+            return groupImageService.downloadImageFromUrl(url, imageName) ? 1 : 2;
         }
     }
 

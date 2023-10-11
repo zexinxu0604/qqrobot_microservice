@@ -12,7 +12,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class group_Message_Sender extends basic_Sender{
+public class GroupMessageSender extends BasicSender {
     private String card;
 
     private String area;

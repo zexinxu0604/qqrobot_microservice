@@ -11,8 +11,8 @@ import org.xzx.handler.RobotEventPostProcessor;
 @EnableDiscoveryClient
 @EnableFeignClients
 @Import(RobotEventPostProcessor.class)
-public class messageServiceApplication2 {
+public class MessageServiceApplication1 {
     public static void main(String[] args) {
-        SpringApplication.run(messageServiceApplication2.class, args);
+        SpringApplication.run(MessageServiceApplication1.class, args);
     }
 }

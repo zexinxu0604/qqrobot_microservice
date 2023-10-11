@@ -9,7 +9,7 @@ import org.xzx.annotation.RobotListenerHandler;
 import org.xzx.clients.ImageClient;
 import org.xzx.clients.Jx3Clients;
 import org.xzx.pojo.Image.ImageResponse;
-import org.xzx.pojo.messageBean.Received_Group_Message;
+import org.xzx.pojo.messageBean.ReceivedGroupMessage;
 import org.xzx.service.Gocq_service;
 import org.xzx.utils.CQ_Utils;
 import org.xzx.utils.String_Utils;
@@ -32,7 +32,7 @@ public class GroupMessageListener {
     private long qq;
 
     @RobotListenerHandler(concurrency = true)
-    public void getBaiZhan(Received_Group_Message message) {
+    public void getBaiZhan(ReceivedGroupMessage message) {
         if (message.getRaw_message().equals("百战")) {
             if (jx3Clients.getBaizhan().equals("success")) {
                 gocqService.send_group_message(message.getGroup_id(), CQ_Utils.getImageString("baizhan.png"));
@@ -41,7 +41,7 @@ public class GroupMessageListener {
     }
 
     @RobotListenerHandler
-    public void checkImage(Received_Group_Message receivedGroupMessage) {
+    public void checkImage(ReceivedGroupMessage receivedGroupMessage) {
         if (receivedGroupMessage.getRaw_message().startsWith("[CQ:image,")) {
             List<String> cqStrings = String_Utils.getCQStrings(receivedGroupMessage.getRaw_message());
             String imagecq = cqStrings.get(0);
@@ -62,7 +62,7 @@ public class GroupMessageListener {
      * @param receivedGroupMessage [CQ:reply,id=-635735050][CQ:at,qq=2351200988] [CQ:at,qq=2351200988] 123
      */
     @RobotListenerHandler
-    public void deleteImage(Received_Group_Message receivedGroupMessage) {
+    public void deleteImage(ReceivedGroupMessage receivedGroupMessage) {
         int group_id = receivedGroupMessage.getGroup_id();
         if (receivedGroupMessage.getRaw_message().startsWith("[CQ:reply,") && receivedGroupMessage.getRaw_message().endsWith("删除图片")) {
             List<String> cqStrings = String_Utils.getCQStrings(receivedGroupMessage.getRaw_message());
@@ -90,7 +90,7 @@ public class GroupMessageListener {
     }
 
     @RobotListenerHandler
-    public void restoreImage(Received_Group_Message receivedGroupMessage) {
+    public void restoreImage(ReceivedGroupMessage receivedGroupMessage) {
         int group_id = receivedGroupMessage.getGroup_id();
         if (receivedGroupMessage.getRaw_message().startsWith("[CQ:reply,") && receivedGroupMessage.getRaw_message().endsWith("恢复图片")) {
             List<String> cqStrings = String_Utils.getCQStrings(receivedGroupMessage.getRaw_message());
@@ -118,7 +118,7 @@ public class GroupMessageListener {
     }
 
     @RobotListenerHandler
-    public void getRandomImage(Received_Group_Message receivedGroupMessage) {
+    public void getRandomImage(ReceivedGroupMessage receivedGroupMessage) {
         if (receivedGroupMessage.getRaw_message().equals(CQ_Utils.getAtString(qq)) || receivedGroupMessage.getRaw_message().equals(CQ_Utils.getAtString(qq) + " ")) {
             ImageResponse imageResponse = imageClient.getRandomImage();
             System.out.println(imageResponse.getUrl());

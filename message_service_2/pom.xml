@@ -93,7 +93,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <mainClass>
-                        org.xzx.messageServiceApplication2
+                        org.xzx.MessageServiceApplication2
                     </mainClass>
                 </configuration>
             </plugin>

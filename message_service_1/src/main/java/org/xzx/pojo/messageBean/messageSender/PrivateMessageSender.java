@@ -1,4 +1,4 @@
-package org.xzx.pojo.messageBean;
+package org.xzx.pojo.messageBean.messageSender;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
@@ -6,20 +6,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
-import org.xzx.pojo.messageBean.messageSender.private_Message_Sender;
 
 @Data
-@SuperBuilder
 @ToString(callSuper = true)
 @AllArgsConstructor
+@SuperBuilder
 @NoArgsConstructor
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Received_Private_Message extends Message{
+public class PrivateMessageSender extends BasicSender {
 
-    private int target_id;
+    private int group_id = 0;
 
-    private int temp_source = 0;
-
-    private private_Message_Sender sender;
 }

@@ -6,12 +6,13 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.xzx.annotation.RobotListenerHandler;
 import org.xzx.pojo.messageBean.Message;
-import org.xzx.pojo.messageBean.Received_Group_Message;
-import org.xzx.pojo.messageBean.Received_Private_Message;
+import org.xzx.pojo.messageBean.ReceivedGroupMessage;
+import org.xzx.pojo.messageBean.ReceivedPrivateMessage;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.function.Consumer;
@@ -47,12 +48,12 @@ public class HandlerResolver {
     private Class<? extends Message> methodEvent(Method method) {
         Parameter[] parameters = method.getParameters();
         if (parameters.length < 1 || parameters[0].getType().isAssignableFrom(Message.class))
-            throw new IllegalArgumentException("监听器Handler方法的第一个参数必须是Event及其子类型!");
+            throw new IllegalArgumentException("监听器Handler方法的第一个参数必须是Message及其子类型!");
         return parameters[0].getType().asSubclass(Message.class);
     }
 
     private void addHandlerMethod(RobotListenerHandler annotation, Class<? extends Message> messageClazz, Method method) {
-        Consumer<Message> invoke = event -> this.invokeMethod(method, event);
+        Consumer<Message> invoke = message -> this.invokeMethod(method, message);
         if (!handlers.containsKey(messageClazz))
             handlers.put(messageClazz, new PriorityQueue<>(EventHandler::compareOrder));
         handlers.get(messageClazz).offer(new EventHandler(annotation, invoke));
@@ -79,22 +80,10 @@ public class HandlerResolver {
                 handlers.get(messageClazz).forEach(handler -> {
                     if (handler.annotation().concurrency()) {
                         threadPoolTaskExecutor.execute(() -> {
-                            if (message instanceof Received_Group_Message receivedGroupMessage) {
-                                handler.acceptIfContainsId(receivedGroupMessage.getGroup_id(), receivedGroupMessage);
-                            } else if (message instanceof Received_Private_Message receivedPrivateMessage) {
-                                handler.acceptIfContainsId(receivedPrivateMessage.getSender().getUser_id(), receivedPrivateMessage);
-                            } else {
-                                handler.accept(message);
-                            }
+                            handler.accept(message);
                         });
                     } else {
-                        if (message instanceof Received_Group_Message receivedGroupMessage) {
-                            handler.acceptIfContainsId(receivedGroupMessage.getGroup_id(), receivedGroupMessage);
-                        } else if (message instanceof Received_Private_Message receivedPrivateMessage) {
-                            handler.acceptIfContainsId(receivedPrivateMessage.getSender().getUser_id(), receivedPrivateMessage);
-                        } else {
-                            handler.accept(message);
-                        }
+                        handler.accept(message);
                     }
                 });
             }
