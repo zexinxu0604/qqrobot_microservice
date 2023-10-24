@@ -2,7 +2,7 @@ package org.xzx.clients;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
-import org.xzx.pojo.Image.ImageResponse;
+import org.xzx.bean.response.*;
 
 @FeignClient(name = "group-image-service", fallback = ImageClientFallBack.class)
 public interface ImageClient {
@@ -10,14 +10,14 @@ public interface ImageClient {
     ImageResponse getRandomImage();
 
     @GetMapping("/image/checkUrl")
-    int checkUrl(@RequestParam String url, @RequestParam long poster, @RequestParam long groupid);
+    ApiResponse<CheckImageResponse> checkUrl(@RequestParam String url, @RequestParam long poster, @RequestParam long groupid);
 
     @GetMapping("/image/insertImage")
-    boolean insertImage(@RequestParam String url, @RequestParam long poster, @RequestParam long groupid);
+    ApiResponse<CheckImageResponse> insertImage(@RequestParam String url, @RequestParam long poster, @RequestParam long groupid);
 
     @GetMapping("/image/deleteImage")
-    boolean deleteImage(@RequestParam String url);
+    ApiResponse<DeleteImageResponse> deleteImage(@RequestParam String url);
 
     @GetMapping("/image/restoreImage")
-    boolean restoreImage(@RequestParam String url);
+    ApiResponse<RestoreImageResponse> restoreImage(@RequestParam String url);
 }

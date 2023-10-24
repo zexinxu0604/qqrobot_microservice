@@ -5,14 +5,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.xzx.annotation.RobotListenerHandler;
-import org.xzx.pojo.messageBean.Message;
-import org.xzx.pojo.messageBean.ReceivedGroupMessage;
-import org.xzx.pojo.messageBean.ReceivedPrivateMessage;
+import org.xzx.bean.messageBean.Message;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.function.Consumer;
@@ -75,9 +72,10 @@ public class HandlerResolver {
     }
 
     public static void handleEvent(Message message) {
-        handlers.keySet().forEach(messageClazz -> {
+        for (Class<? extends Message> messageClazz: handlers.keySet()){
             if (messageClazz.isAssignableFrom(message.getClass())) {
-                handlers.get(messageClazz).forEach(handler -> {
+                PriorityQueue<EventHandler> queue = handlers.get(messageClazz);
+                for(EventHandler handler: queue){
                     if (handler.annotation().concurrency()) {
                         threadPoolTaskExecutor.execute(() -> {
                             handler.accept(message);
@@ -85,8 +83,24 @@ public class HandlerResolver {
                     } else {
                         handler.accept(message);
                     }
-                });
+                    if (handler.annotation().shutdown()){
+                        break;
+                    }
+                }
             }
-        });
+        }
+//        handlers.keySet().forEach(messageClazz -> {
+//            if (messageClazz.isAssignableFrom(message.getClass())) {
+//                handlers.get(messageClazz).forEach(handler -> {
+//                    if (handler.annotation().concurrency()) {
+//                        threadPoolTaskExecutor.execute(() -> {
+//                            handler.accept(message);
+//                        });
+//                    } else {
+//                        handler.accept(message);
+//                    }
+//                });
+//            }
+//        });
     }
 }

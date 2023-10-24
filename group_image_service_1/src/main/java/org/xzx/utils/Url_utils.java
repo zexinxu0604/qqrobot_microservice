@@ -32,7 +32,13 @@ public class Url_utils {
         }
     }
 
-    public boolean downloadImage(String url, String path) {
+    /**
+     * 下载并获取本地图片名称
+     * @param url url
+     * @param path 文件路径
+     * @return 带格式的文件名
+     */
+    public String downloadImage(String url, String path, String imageName) {
         try {
             //用restTemplate下载图片
             ResponseEntity<byte[]> responseEntity = restTemplate.exchange(url, HttpMethod.GET, null, byte[].class);
@@ -46,10 +52,11 @@ public class Url_utils {
                 fileOutputStream.write(body);
                 //关闭流
                 fileOutputStream.close();
+                return imageName + "." + format;
             }
-            return true;
+            return null;
         } catch (IOException e) {
-            return false;
+            return null;
         }
     }
 

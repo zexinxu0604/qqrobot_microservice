@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.xzx.dao.GroupImageDao;
-import org.xzx.pojo.GroupImage;
+import org.xzx.bean.GroupImage;
 import org.xzx.utils.String_Utils;
 import org.xzx.utils.Url_utils;
 
@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+//TODO:在插入图片时，将后缀名也保存
 @Service
 public class GroupImageService {
 
@@ -60,9 +61,12 @@ public class GroupImageService {
         GroupImage groupImage = new GroupImage();
         groupImage.setUrl(url);
         groupImage.setPoster(poster);
-        groupImage.setLocalurl(String_Utils.getImageName(url));
+        groupImage.setLocalurl(url_utils.downloadImage(url, imagepath + String_Utils.getImageName(url), String_Utils.getImageName(url)));
         groupImage.setGroupid(groupid);
         groupImage.setIsDel(0);
+        if(groupImage.getLocalurl() == null){
+            return false;
+        }
         return groupImageDao.insert(groupImage) == 1;
     }
 
@@ -88,10 +92,6 @@ public class GroupImageService {
     public boolean checkLocalPathExist(String localPath){
         Path path = Paths.get(imagepath + localPath + ".png");
         return path.toFile().exists();
-    }
-
-    public boolean downloadImageFromUrl(String url, String imageName){
-        return url_utils.downloadImage(url, imagepath + imageName);
     }
 
 }

@@ -26,4 +26,8 @@ public @interface RobotListenerHandler {
      */
     boolean concurrency() default false;
 
+    boolean shutdown() default false;
+
+
+
 }

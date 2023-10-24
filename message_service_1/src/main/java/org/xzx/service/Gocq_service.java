@@ -5,8 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.xzx.pojo.messageBean.Send_Message.SendGroupMessage;
-import org.xzx.pojo.messageBean.Send_Message.PrivateMessage;
+import org.xzx.bean.messageBean.Send_Message.SendGroupMessage;
+import org.xzx.bean.messageBean.Send_Message.PrivateMessage;
 
 @Service
 public class Gocq_service {

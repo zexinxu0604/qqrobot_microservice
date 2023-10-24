@@ -1,7 +1,7 @@
 package org.xzx.handler;
 
 import org.xzx.annotation.RobotListenerHandler;
-import org.xzx.pojo.messageBean.Message;
+import org.xzx.bean.messageBean.Message;
 
 import java.util.function.Consumer;
 

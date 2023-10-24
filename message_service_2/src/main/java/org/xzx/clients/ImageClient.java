@@ -4,7 +4,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.xzx.pojo.Image.ImageResponse;
+import org.xzx.bean.Image.ImageResponse;
 
 @FeignClient(name = "group-image-service", fallback = ImageClientFallBack.class)
 public interface ImageClient {

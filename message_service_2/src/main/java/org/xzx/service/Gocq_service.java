@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.xzx.pojo.messageBean.Send_Message.PrivateMessage;
-import org.xzx.pojo.messageBean.Send_Message.SendGroupMessage;
+import org.xzx.bean.messageBean.Send_Message.PrivateMessage;
+import org.xzx.bean.messageBean.Send_Message.SendGroupMessage;
 
 @Service
 public class Gocq_service {

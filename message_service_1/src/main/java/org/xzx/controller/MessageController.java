@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.xzx.handler.HandlerResolver;
-import org.xzx.pojo.messageBean.ReceivedGroupMessage;
-import org.xzx.pojo.messageBean.ReceivedPrivateMessage;
+import org.xzx.bean.messageBean.ReceivedGroupMessage;
+import org.xzx.bean.messageBean.ReceivedPrivateMessage;
 
 @Controller
 public class MessageController {

@@ -5,9 +5,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.xzx.annotation.RobotListenerHandler;
-import org.xzx.pojo.messageBean.Message;
-import org.xzx.pojo.messageBean.ReceivedGroupMessage;
-import org.xzx.pojo.messageBean.ReceivedPrivateMessage;
+import org.xzx.bean.messageBean.Message;
+import org.xzx.bean.messageBean.ReceivedGroupMessage;
+import org.xzx.bean.messageBean.ReceivedPrivateMessage;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;

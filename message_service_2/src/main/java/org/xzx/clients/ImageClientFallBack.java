@@ -1,7 +1,7 @@
 package org.xzx.clients;
 
 import org.springframework.stereotype.Component;
-import org.xzx.pojo.Image.ImageResponse;
+import org.xzx.bean.Image.ImageResponse;
 
 @Component
 public class ImageClientFallBack implements ImageClient{
