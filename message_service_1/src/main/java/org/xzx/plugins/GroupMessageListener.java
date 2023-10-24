@@ -6,12 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.xzx.annotation.RobotListener;
 import org.xzx.annotation.RobotListenerHandler;
+import org.xzx.bean.enums.ApiResultCode;
 import org.xzx.bean.enums.CheckImageResponseCode;
 import org.xzx.bean.enums.DeleteImageResponseCode;
 import org.xzx.bean.enums.RestoreImageResponseCode;
+import org.xzx.bean.response.*;
 import org.xzx.clients.ImageClient;
 import org.xzx.clients.Jx3Clients;
-import org.xzx.bean.response.ImageResponse;
 import org.xzx.bean.messageBean.ReceivedGroupMessage;
 import org.xzx.service.Gocq_service;
 import org.xzx.utils.CQ_Utils;
@@ -54,9 +55,10 @@ public class GroupMessageListener {
             long group_id = receivedGroupMessage.getGroup_id();
             if (Image_String_Utils.ifStaredImage(imagecq)) {
                 String imageUrl = Image_String_Utils.getImageURL(imagecq);
-                if (imageClient.checkUrl(imageUrl, poster, group_id).getCode() == CheckImageResponseCode.IMAGE_DOWNLOAD_SUCCESS.getCode()) {
+                ApiResponse<CheckImageResponse> checkImageResponseApiResponse = imageClient.checkUrl(imageUrl, poster, group_id);
+                if (checkImageResponseApiResponse.getCode() == ApiResultCode.SUCCESS.getCode() && checkImageResponseApiResponse.getData().getCode() == CheckImageResponseCode.IMAGE_DOWNLOAD_SUCCESS.getCode()) {
                     gocqService.send_group_message(receivedGroupMessage.getGroup_id(), "没见过，偷了");
-                } else if (imageClient.checkUrl(imageUrl, poster, group_id).getCode() == CheckImageResponseCode.IMAGE_DOWNLOAD_FAILED.getCode()) {
+                } else if (checkImageResponseApiResponse.getCode() == ApiResultCode.SUCCESS.getCode() && checkImageResponseApiResponse.getData().getCode() == CheckImageResponseCode.IMAGE_DOWNLOAD_FAILED.getCode()) {
                     gocqService.send_group_message(receivedGroupMessage.getGroup_id(), "没见过，但没偷成");
                 }
             }
@@ -66,6 +68,8 @@ public class GroupMessageListener {
     /**
      * @param receivedGroupMessage [CQ:reply,id=-635735050][CQ:at,qq=2351200988] [CQ:at,qq=2351200988] 123
      */
+
+    //TODO 删除图片中at qq的部分，需要更改，因为at的qq可能不是机器人的qq
     @RobotListenerHandler
     public void deleteImage(ReceivedGroupMessage receivedGroupMessage) {
         int group_id = receivedGroupMessage.getGroup_id();
@@ -81,7 +85,8 @@ public class GroupMessageListener {
                     String raw_message = jsonNode.get("data").get("message").asText();
                     List<String> raw_cq_string = Image_String_Utils.getCQStrings(raw_message);
                     String raw_picture_url = Image_String_Utils.getImageURL(raw_cq_string.get(0));
-                    if (imageClient.deleteImage(raw_picture_url).getCode() == DeleteImageResponseCode.IMAGE_DELETE_SUCCESS.getCode()) {
+                    ApiResponse<DeleteImageResponse> deleteImageResponseApiResponse = imageClient.deleteImage(raw_picture_url);
+                    if (deleteImageResponseApiResponse.getCode() == ApiResultCode.SUCCESS.getCode() && deleteImageResponseApiResponse.getData().getCode() == DeleteImageResponseCode.IMAGE_DELETE_SUCCESS.getCode()) {
                         gocqService.send_group_message(group_id, "已删除");
                     } else {
                         gocqService.send_group_message(group_id, "找到原图片成功但，删除失败");
@@ -94,6 +99,7 @@ public class GroupMessageListener {
         }
     }
 
+    //TODO 恢复图片中at qq的部分，需要更改，因为at的qq可能不是机器人的qq
     @RobotListenerHandler
     public void restoreImage(ReceivedGroupMessage receivedGroupMessage) {
         int group_id = receivedGroupMessage.getGroup_id();
@@ -109,7 +115,8 @@ public class GroupMessageListener {
                     String raw_message = jsonNode.get("data").get("message").asText();
                     List<String> raw_cq_string = Image_String_Utils.getCQStrings(raw_message);
                     String raw_picture_url = Image_String_Utils.getImageURL(raw_cq_string.get(0));
-                    if (imageClient.restoreImage(raw_picture_url).getCode() == RestoreImageResponseCode.IMAGE_RESTORE_SUCCESS.getCode()) {
+                    ApiResponse<RestoreImageResponse> restoreImageResponseApiResponse = imageClient.restoreImage(raw_picture_url);
+                    if (restoreImageResponseApiResponse.getCode() == ApiResultCode.SUCCESS.getCode() && restoreImageResponseApiResponse.getData().getCode() == RestoreImageResponseCode.IMAGE_RESTORE_SUCCESS.getCode()) {
                         gocqService.send_group_message(group_id, "已恢复");
                     } else {
                         gocqService.send_group_message(group_id, "找到原图片成功但，恢复失败");
