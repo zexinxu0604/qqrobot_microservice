@@ -13,7 +13,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-//TODO:在插入图片时，将后缀名也保存
 @Service
 public class GroupImageService {
 
@@ -34,7 +33,6 @@ public class GroupImageService {
     public boolean isImageExist(String url) {
         QueryWrapper<GroupImage> queryWrapper = new QueryWrapper<>();
         queryWrapper.like("url", url + "/0?term=2");
-        queryWrapper.eq("isDel", 0);
         List<GroupImage> groupImages = groupImageDao.selectList(queryWrapper);
         return !groupImages.isEmpty();
     }
@@ -57,6 +55,7 @@ public class GroupImageService {
         return groupImageDao.selectOne(queryWrapper);
     }
 
+    //TODO 添加图片时，判断图片是否已经存在并删除,并详细定义API返回值
     public boolean insertImage(String url, long poster, long groupid){
         GroupImage groupImage = new GroupImage();
         groupImage.setUrl(url);
@@ -68,6 +67,18 @@ public class GroupImageService {
             return false;
         }
         return groupImageDao.insert(groupImage) == 1;
+    }
+
+    public boolean checkImageExist(String url, long poster, long groupid){
+        String name = String_Utils.getImageName(url);
+        QueryWrapper<GroupImage> queryWrapper = new QueryWrapper<>();
+        queryWrapper.like("url", name + "/0?term=2");
+        List<GroupImage> groupImages = groupImageDao.selectList(queryWrapper);
+        if(groupImages.isEmpty()){
+            return insertImage(url, poster, groupid);
+        } else {
+            return true;
+        }
     }
 
     public boolean deleteImage(String url){

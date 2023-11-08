@@ -40,8 +40,6 @@ public class ImageServiceController {
         }
     }
 
-    //TODO: 重构下载图片的代码，判断图片类型
-
     /**
      * 检查是否存在该图片，如果不存在则下载
      *
