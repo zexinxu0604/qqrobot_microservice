@@ -1,9 +1,6 @@
 package org.xzx.utils;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-public class CQ_Utils {
+public class CQ_Generator_Utils {
 
     public static String getAtString(long id) {
         return "[CQ:at,qq=" + id + "]";

@@ -1,14 +1,20 @@
 package org.xzx.utils;
 
+import com.aliyun.oss.OSS;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 图片CQ码相关工具类
+ * CQ码相关工具类
  */
-public class Image_String_Utils {
+public class CQ_String_Utils {
+
     /**
      *
      * @param str [CQ:xxx]sadas[CQ:xxx]sadas[CQ:xxx]
@@ -80,15 +86,15 @@ public class Image_String_Utils {
     }
 
     public static long getReplyAtQQ(String str) {
-        List<String> cqStrings = Image_String_Utils.getCQStrings(str);
+        List<String> cqStrings = CQ_String_Utils.getCQStrings(str);
         String atPersonCQ = cqStrings.get(1);
-        return Long.parseLong(Image_String_Utils.getQQFromAt(atPersonCQ));
+        return Long.parseLong(CQ_String_Utils.getQQFromAt(atPersonCQ));
     }
 
     public static int getMessageId(String str){
-        List<String> cqStrings = Image_String_Utils.getCQStrings(str);
+        List<String> cqStrings = CQ_String_Utils.getCQStrings(str);
         String replycq = cqStrings.get(0);
-        return Integer.parseInt(Image_String_Utils.getIdFromReply(replycq));
+        return Integer.parseInt(CQ_String_Utils.getIdFromReply(replycq));
     }
 
 }

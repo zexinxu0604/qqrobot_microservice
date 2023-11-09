@@ -62,7 +62,8 @@ public class GroupImageService {
         GroupImage groupImage = new GroupImage();
         groupImage.setUrl(url);
         groupImage.setPoster(poster);
-        groupImage.setLocalurl(url_utils.downloadImage(url, imagepath + String_Utils.getImageName(url), String_Utils.getImageName(url)));
+//        groupImage.setLocalurl(url_utils.downloadImage(url, imagepath + String_Utils.getImageName(url), String_Utils.getImageName(url)));
+        groupImage.setLocalurl(url_utils.sendImageToOSS(url, String_Utils.getImageName(url)));
         groupImage.setGroupid(groupid);
         groupImage.setIsDel(0);
         if (groupImage.getLocalurl() == null) {

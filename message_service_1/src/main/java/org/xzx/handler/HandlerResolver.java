@@ -89,18 +89,5 @@ public class HandlerResolver {
                 }
             }
         }
-//        handlers.keySet().forEach(messageClazz -> {
-//            if (messageClazz.isAssignableFrom(message.getClass())) {
-//                handlers.get(messageClazz).forEach(handler -> {
-//                    if (handler.annotation().concurrency()) {
-//                        threadPoolTaskExecutor.execute(() -> {
-//                            handler.accept(message);
-//                        });
-//                    } else {
-//                        handler.accept(message);
-//                    }
-//                });
-//            }
-//        });
     }
 }

@@ -1,4 +1,4 @@
-package org.xzx.utils;
+package org.xzx.configs;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
