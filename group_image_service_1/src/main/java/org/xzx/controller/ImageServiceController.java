@@ -60,7 +60,7 @@ public class ImageServiceController {
     @GetMapping("/image/insertImage")
     @ResponseBody
     public ApiResponse<CheckImageResponse> insertImage(String url, long poster, long groupid) {
-        return groupImageService.insertImage(url, poster, groupid) ? new ApiResponse<>(ApiResultCode.SUCCESS.getCode(), ApiResultCode.SUCCESS.getMessage(), new CheckImageResponse(CheckImageResponseCode.IMAGE_DOWNLOAD_SUCCESS)) : new ApiResponse<>(ApiResultCode.FAILED.getCode(), ApiResultCode.FAILED.getMessage(), new CheckImageResponse(CheckImageResponseCode.IMAGE_DOWNLOAD_FAILED));
+        return groupImageService.checkImageExist(url, poster, groupid) ? new ApiResponse<>(ApiResultCode.SUCCESS.getCode(), ApiResultCode.SUCCESS.getMessage(), new CheckImageResponse(CheckImageResponseCode.IMAGE_DOWNLOAD_SUCCESS)) : new ApiResponse<>(ApiResultCode.FAILED.getCode(), ApiResultCode.FAILED.getMessage(), new CheckImageResponse(CheckImageResponseCode.IMAGE_DOWNLOAD_FAILED));
     }
 
     @GetMapping("/image/deleteImage")

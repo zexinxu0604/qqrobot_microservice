@@ -79,4 +79,16 @@ public class Image_String_Utils {
         return str.substring(str.indexOf("qq=") + 3, str.indexOf("]"));
     }
 
+    public static long getReplyAtQQ(String str) {
+        List<String> cqStrings = Image_String_Utils.getCQStrings(str);
+        String atPersonCQ = cqStrings.get(1);
+        return Long.parseLong(Image_String_Utils.getQQFromAt(atPersonCQ));
+    }
+
+    public static int getMessageId(String str){
+        List<String> cqStrings = Image_String_Utils.getCQStrings(str);
+        String replycq = cqStrings.get(0);
+        return Integer.parseInt(Image_String_Utils.getIdFromReply(replycq));
+    }
+
 }
