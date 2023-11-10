@@ -47,15 +47,6 @@ public class GroupMessageListener {
     @Autowired
     private AliyunOSSUtils aliyunOSSUtils;
 
-    @RobotListenerHandler(concurrency = true)
-    public void getBaiZhan(ReceivedGroupMessage message) {
-        if (message.getRaw_message().equals("百战")) {
-            if (jx3Clients.getBaizhan().equals("success")) {
-                gocqService.send_group_message(message.getGroup_id(), CQ_Generator_Utils.getImageString("baizhan.png"));
-            }
-        }
-    }
-
     @RobotListenerHandler
     public void checkImage(ReceivedGroupMessage receivedGroupMessage) {
         if (receivedGroupMessage.getRaw_message().startsWith("[CQ:image,")) {

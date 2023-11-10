@@ -35,4 +35,9 @@ public class ImageClientFallBack implements ImageClient{
         return new ApiResponse<>(ApiResultCode.FAILED.getCode(), ApiResultCode.FAILED.getMessage(), null);
     }
 
+    @Override
+    public String getBaizhan() {
+        return null;
+    }
+
 }

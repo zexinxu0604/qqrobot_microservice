@@ -117,11 +117,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-<!--                <configuration>-->
-<!--                    <mainClass>-->
-<!--                        org.xzx.MessageServiceApplication1-->
-<!--                    </mainClass>-->
-<!--                </configuration>-->
             </plugin>
         </plugins>
     </build>

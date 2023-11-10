@@ -31,12 +31,7 @@ public class ImageServiceController {
         if (url_utils.checkUrl(url)) {
             return new ImageResponse(200, 0, url);
         } else {
-            if (groupImageService.checkLocalPathExist(groupImage.getLocalurl())) {
-                return new ImageResponse(200, 1, groupImage.getLocalurl());
-            } else {
-                groupImageService.deleteImage(url);
-                return new ImageResponse(404, 0, null);
-            }
+            return new ImageResponse(200, 1, groupImage.getLocalurl());
         }
     }
 

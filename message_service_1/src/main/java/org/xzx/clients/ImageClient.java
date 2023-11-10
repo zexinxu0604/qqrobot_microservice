@@ -20,4 +20,7 @@ public interface ImageClient {
 
     @GetMapping("/image/restoreImage")
     ApiResponse<RestoreImageResponse> restoreImage(@RequestParam String url);
+
+    @RequestMapping("/getbaizhan")
+    String getBaizhan();
 }

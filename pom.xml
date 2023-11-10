@@ -8,9 +8,7 @@
     <modules>
         <module>message_service_1</module>
         <module>gateway_server</module>
-        <module>message_service_2</module>
         <module>group_image_service_1</module>
-        <module>jx3_service</module>
     </modules>
     <groupId>org.xzx</groupId>
     <artifactId>qq_robot_microservice</artifactId>
@@ -132,11 +130,6 @@
                 <version>4.4.13</version>
             </dependency>
 
-            <dependency>
-                <groupId>com.microsoft.playwright</groupId>
-                <artifactId>playwright</artifactId>
-                <version>1.34.0</version>
-            </dependency>
 
             <dependency>
                 <groupId>org.springframework</groupId>
