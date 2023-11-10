@@ -1,7 +1,9 @@
 package org.xzx.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpHeaders;
@@ -11,9 +13,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
+import org.xzx.bean.qqGroupBean.GroupInfo;
+
+import java.util.List;
+import java.util.Arrays;
 
 @Service
+@Log4j2
 public class SpringRestService {
     @Autowired
     private RestTemplate restTemplate;
@@ -89,4 +95,27 @@ public class SpringRestService {
         // 返回响应body
         return response.getBody();
     }
+
+    public <T> List<T> getForList(String url, Class<T> responseType) {
+        System.out.println("准备发送");
+
+        ResponseEntity<List<T>> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<T>>(){});
+        System.out.println("发送http请求完成");
+        return response.getBody();
+    }
+
+    public List<GroupInfo> getGroupList(String url){
+        ResponseEntity<List<GroupInfo>> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<GroupInfo>>(){});
+        System.out.println("发送http请求完成");
+        return response.getBody();
+    }
+
 }

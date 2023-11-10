@@ -19,6 +19,7 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 import java.io.*;
+import java.net.URL;
 
 @Component
 @Log4j2
@@ -91,7 +92,10 @@ public class Url_utils {
             if(body != null){
                 InputStream inputStream = new ByteArrayInputStream(body);
                 String format = getWebImageFormat(inputStream);
-                PutObjectRequest putObjectRequest = new PutObjectRequest(bucket, imageName + "." + format, inputStream);
+                format = format.toLowerCase();
+
+                InputStream inputStream2 = new URL(url).openStream();
+                PutObjectRequest putObjectRequest = new PutObjectRequest(bucket, imageName + "." + format, inputStream2);
                 PutObjectResult putObjectResult = ossClient.putObject(putObjectRequest);
                 return imageName + "." + format;
             }
