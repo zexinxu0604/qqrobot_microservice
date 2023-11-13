@@ -12,7 +12,7 @@ public class WebSocketMessage {
 
     private String sender;
 
-    private int sender_id;
+    private long sender_id;
 
     private int isImg;
 

@@ -18,7 +18,7 @@ flag    匿名用户 flag, 在调用禁言 API 时需要传入
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AnonymousMessage {
-    private int id;
+    private long id;
 
     private String name;
 

@@ -89,7 +89,7 @@ public class GroupMessageListener {
     @RobotListenerHandler(order = 1, shutdown = true)
     public void imageReplyActions(ReceivedGroupMessage receivedGroupMessage) {
         int group_id = receivedGroupMessage.getGroup_id();
-        int poster = receivedGroupMessage.getUser_id();
+        long poster = receivedGroupMessage.getUser_id();
         String raw_message = receivedGroupMessage.getRaw_message();
         if (!raw_message.startsWith("[CQ:reply,") || !raw_message.endsWith("图片")) {
             return;
@@ -156,7 +156,7 @@ public class GroupMessageListener {
         return CQ_String_Utils.getImageURL(raw_cq_string.get(0));
     }
 
-    private void handleImageActions(String raw_message, String raw_picture_url, int group_id, int poster) {
+    private void handleImageActions(String raw_message, String raw_picture_url, int group_id, long poster) {
         if (raw_message.endsWith("删除图片")) {
             handleDeleteImage(raw_picture_url, group_id);
         } else if (raw_message.endsWith("恢复图片")) {
@@ -186,7 +186,7 @@ public class GroupMessageListener {
         }
     }
 
-    private void handleAddImage(String raw_picture_url, int group_id, int poster) {
+    private void handleAddImage(String raw_picture_url, int group_id, long poster) {
         ApiResponse<CheckImageResponse> response = imageClient.checkUrl(raw_picture_url, poster, group_id);
         if (response.getCode() == ApiResultCode.SUCCESS.getCode() && response.getData().getCode() == CheckImageResponseCode.IMAGE_DOWNLOAD_SUCCESS.getCode()) {
             gocqService.send_group_message(group_id, "没见过，偷了");

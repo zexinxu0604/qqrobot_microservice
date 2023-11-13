@@ -24,7 +24,7 @@ public class Message {
 
     private int message_id;
 
-    private int user_id;
+    private long user_id;
 
     private String message;
 

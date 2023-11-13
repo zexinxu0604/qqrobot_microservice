@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PrivateMessage {
-    private int user_id;
+    private long user_id;
 
     private String message;
 
