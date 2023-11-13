@@ -3,9 +3,11 @@ package org.xzx.handler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.xzx.annotation.RobotListenerHandler;
 import org.xzx.bean.messageBean.Message;
+import org.xzx.bean.messageUtil.MessageBreaker;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -24,12 +26,15 @@ public class HandlerResolver {
 
     private static ThreadPoolTaskExecutor threadPoolTaskExecutor = null;
 
+    private static MessageBreaker messageBreaker = null;
+
 
     public HandlerResolver(Object bean, BeanFactory factory, Method... declaredMethods) {
         this.bean = bean;
         this.factory = factory;
         this.declaredMethods = declaredMethods;
         threadPoolTaskExecutor = (ThreadPoolTaskExecutor) factory.getBean("taskExecutor");
+        messageBreaker = (MessageBreaker) factory.getBean("messageBreaker");
         this.resolve();
     }
 
@@ -83,7 +88,7 @@ public class HandlerResolver {
                     } else {
                         handler.accept(message);
                     }
-                    if (handler.annotation().shutdown()){
+                    if (handler.annotation().shutdown() && messageBreaker.isBreak()){
                         break;
                     }
                 }

@@ -1,4 +1,4 @@
-package org.xzx.bean.counter;
+package org.xzx.bean.messageUtil;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

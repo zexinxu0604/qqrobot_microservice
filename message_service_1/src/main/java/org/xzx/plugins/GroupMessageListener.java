@@ -1,20 +1,16 @@
 package org.xzx.plugins;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.xzx.annotation.RobotListener;
 import org.xzx.annotation.RobotListenerHandler;
-import org.xzx.bean.counter.MessageCounter;
-import org.xzx.bean.enums.ApiResultCode;
-import org.xzx.bean.enums.CheckImageResponseCode;
-import org.xzx.bean.enums.DeleteImageResponseCode;
-import org.xzx.bean.enums.RestoreImageResponseCode;
+import org.xzx.bean.enums.*;
+import org.xzx.bean.messageUtil.MessageBreaker;
+import org.xzx.bean.messageUtil.MessageCounter;
 import org.xzx.bean.response.*;
 import org.xzx.clients.ImageClient;
-import org.xzx.clients.Jx3Clients;
 import org.xzx.bean.messageBean.ReceivedGroupMessage;
 import org.xzx.service.Gocq_service;
 import org.xzx.service.GroupImageService;
@@ -49,20 +45,21 @@ public class GroupMessageListener {
     @Autowired
     private Map<Integer, MessageCounter> messageCounterMap;
 
-    @RobotListenerHandler(order = -1, shutdown = false)
+    @Autowired
+    private MessageBreaker messageBreaker;
+
+    @RobotListenerHandler(order = -1)
     public void countMessage(ReceivedGroupMessage receivedGroupMessage) {
         int group_id = receivedGroupMessage.getGroup_id();
         MessageCounter messageCounter = messageCounterMap.get(group_id);
-        if(messageCounter.getMessageCount() == messageCounter.getMaxMessageCount() - 1){
-            getRandomImage(group_id);
-        }
         messageCounter.addMessageCount();
         if(messageCounter.getMessageCount() == messageCounter.getMaxMessageCount()){
+            getRandomImage(group_id);
             messageCounter.setMessageCount(0);
         }
     }
 
-    @RobotListenerHandler
+    @RobotListenerHandler(shutdown = true)
     public void checkImage(ReceivedGroupMessage receivedGroupMessage) {
         if (receivedGroupMessage.getRaw_message().startsWith("[CQ:image,")) {
             List<String> cqStrings = CQ_String_Utils.getCQStrings(receivedGroupMessage.getRaw_message());
@@ -78,6 +75,7 @@ public class GroupMessageListener {
                     gocqService.send_group_message(receivedGroupMessage.getGroup_id(), "没见过，但没偷成");
                 }
             }
+            messageBreaker.setMessageBreakCode(MessageBreakCode.BREAK);
         }
     }
 
@@ -97,20 +95,20 @@ public class GroupMessageListener {
             handleImageActions(raw_message, raw_picture_url, group_id, poster);
         } catch (Exception e) {
             log.error("在处理回复消息中出现问题", e);
+        } finally {
+            messageBreaker.setMessageBreakCode(MessageBreakCode.BREAK);
         }
 
     }
 
 
-    @RobotListenerHandler
+    @RobotListenerHandler(concurrency = true, shutdown = true)
     public void getRandomImage(ReceivedGroupMessage receivedGroupMessage) {
         if (receivedGroupMessage.getRaw_message().equals(CQ_Generator_Utils.getAtString(qq)) || receivedGroupMessage.getRaw_message().equals(CQ_Generator_Utils.getAtString(qq) + " ")) {
             getRandomImage(receivedGroupMessage.getGroup_id());
+            messageBreaker.setMessageBreakCode(MessageBreakCode.BREAK);
         }
     }
-
-
-
 
 
 
@@ -127,8 +125,7 @@ public class GroupMessageListener {
 
     private String getRawPictureUrl(String raw_message) throws Exception {
         int messageid = CQ_String_Utils.getMessageId(raw_message);
-        JsonNode jsonNode = gocqService.get_message(messageid);
-        String replied_message = jsonNode.get("data").get("message").asText();
+        String replied_message = gocqService.get_message(messageid);
         List<String> raw_cq_string = CQ_String_Utils.getCQStrings(replied_message);
         return CQ_String_Utils.getImageURL(raw_cq_string.get(0));
     }

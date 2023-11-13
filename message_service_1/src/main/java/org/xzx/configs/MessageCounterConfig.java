@@ -4,7 +4,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.xzx.bean.counter.MessageCounter;
+import org.xzx.bean.messageUtil.MessageCounter;
 import org.xzx.bean.qqGroupBean.GroupInfo;
 import org.xzx.service.Gocq_service;
 
@@ -24,7 +24,7 @@ public class MessageCounterConfig {
         log.info("群列表：{}", groupInfoList);
         Map<Integer, MessageCounter> messageCounterMap = new ConcurrentHashMap<>();
         for (GroupInfo groupInfo : groupInfoList) {
-            messageCounterMap.put(groupInfo.getGroup_id(), new MessageCounter(groupInfo.getGroup_id(), 0, 5));
+            messageCounterMap.put(groupInfo.getGroup_id(), new MessageCounter(groupInfo.getGroup_id(), 0, 20));
         }
         return messageCounterMap;
     }

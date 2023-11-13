@@ -31,8 +31,9 @@ public class Gocq_service {
         System.out.println(springRestService.postWithObject(basicUrl + "send_private_msg", privateMessage, String.class));
     }
 
-    public JsonNode get_message(int message_id) {
-        return springRestService.getForObject(basicUrl + "get_msg?message_id=" + message_id, JsonNode.class);
+    public String get_message(int message_id) {
+        JsonNode jsonNode = springRestService.getForObject(basicUrl + "get_msg?message_id=" + message_id, JsonNode.class);
+        return jsonNode.get("data").get("message").asText();
     }
 
     public List<GroupInfo> get_group_list() {

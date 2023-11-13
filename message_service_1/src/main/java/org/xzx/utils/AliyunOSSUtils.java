@@ -1,6 +1,7 @@
 package org.xzx.utils;
 
 import com.aliyun.oss.ClientException;
+import com.aliyun.oss.HttpMethod;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSException;
 import lombok.extern.java.Log;
@@ -8,7 +9,11 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
+import org.springframework.http.MediaTypeFactory;
 import org.springframework.stereotype.Component;
+import com.aliyun.oss.model.GeneratePresignedUrlRequest;
+import com.aliyun.oss.model.ResponseHeaderOverrides;
 
 import java.net.URL;
 import java.util.Date;
@@ -26,8 +31,17 @@ public class AliyunOSSUtils {
     public String getImageUrl(String url) {
         try {
             Date expiration = new Date(new Date().getTime() + 3600 * 1000L);
-            URL oss_url = ossClient.generatePresignedUrl(bucket, url, expiration);
-            log.info("从阿里云获取图片url:" + url);
+
+            GeneratePresignedUrlRequest req = new GeneratePresignedUrlRequest(bucket, url, HttpMethod.GET);
+            req.setExpiration(expiration);
+
+            ResponseHeaderOverrides responseHeaderOverrides = new ResponseHeaderOverrides();
+            responseHeaderOverrides.setContentType(getImageContentType(url).toString().toUpperCase());
+            responseHeaderOverrides.setContentDisposition("inline");
+            req.setResponseHeaders(responseHeaderOverrides);
+
+            URL oss_url = ossClient.generatePresignedUrl(req);
+            log.info("从阿里云获取图片url:" + oss_url.toString());
             return oss_url.toString();
         } catch (OSSException oe){
             log.error("Caught an OSSException, which means your request made it to OSS, "
@@ -44,5 +58,12 @@ public class AliyunOSSUtils {
             log.error("Error Message:" + ce.getMessage());
             return null;
         }
+    }
+
+    public MediaType getImageContentType(String url){
+        if(url.endsWith(".png")) return MediaType.IMAGE_PNG;
+        else if(url.endsWith(".jpg") || url.endsWith(".jpeg")) return MediaType.IMAGE_JPEG;
+        else if(url.endsWith(".gif")) return MediaType.IMAGE_GIF;
+        else return MediaType.IMAGE_JPEG;
     }
 }
