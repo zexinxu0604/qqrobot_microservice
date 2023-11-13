@@ -6,6 +6,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.xzx.annotation.RobotListenerHandler;
+import org.xzx.bean.enums.MessageBreakCode;
 import org.xzx.bean.messageBean.Message;
 import org.xzx.bean.messageUtil.MessageBreaker;
 
@@ -92,6 +93,7 @@ public class HandlerResolver {
                         break;
                     }
                 }
+                messageBreaker.setMessageBreakCode(MessageBreakCode.CONTINUE);
             }
         }
     }

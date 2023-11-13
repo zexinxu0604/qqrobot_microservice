@@ -14,6 +14,7 @@ import org.xzx.clients.ImageClient;
 import org.xzx.bean.messageBean.ReceivedGroupMessage;
 import org.xzx.service.Gocq_service;
 import org.xzx.service.GroupImageService;
+import org.xzx.service.Jx3_service;
 import org.xzx.utils.AliyunOSSUtils;
 import org.xzx.utils.CQ_Generator_Utils;
 import org.xzx.utils.CQ_String_Utils;
@@ -36,6 +37,9 @@ public class GroupMessageListener {
     @Autowired
     private GroupImageService groupImageService;
 
+    @Autowired
+    private Jx3_service jx3Service;
+
     @Value("${qq.number}")
     private long qq;
 
@@ -53,13 +57,13 @@ public class GroupMessageListener {
         int group_id = receivedGroupMessage.getGroup_id();
         MessageCounter messageCounter = messageCounterMap.get(group_id);
         messageCounter.addMessageCount();
-        if(messageCounter.getMessageCount() == messageCounter.getMaxMessageCount()){
+        if (messageCounter.getMessageCount() == messageCounter.getMaxMessageCount()) {
             getRandomImage(group_id);
             messageCounter.setMessageCount(0);
         }
     }
 
-    @RobotListenerHandler(shutdown = true)
+    @RobotListenerHandler(order = 1, shutdown = true)
     public void checkImage(ReceivedGroupMessage receivedGroupMessage) {
         if (receivedGroupMessage.getRaw_message().startsWith("[CQ:image,")) {
             List<String> cqStrings = CQ_String_Utils.getCQStrings(receivedGroupMessage.getRaw_message());
@@ -82,7 +86,7 @@ public class GroupMessageListener {
     /**
      * @param receivedGroupMessage [CQ:reply,id=-635735050][CQ:at,qq=2351200988] [CQ:at,qq=2351200988] 123
      */
-    @RobotListenerHandler(shutdown = true)
+    @RobotListenerHandler(order = 1, shutdown = true)
     public void imageReplyActions(ReceivedGroupMessage receivedGroupMessage) {
         int group_id = receivedGroupMessage.getGroup_id();
         int poster = receivedGroupMessage.getUser_id();
@@ -102,7 +106,7 @@ public class GroupMessageListener {
     }
 
 
-    @RobotListenerHandler(concurrency = true, shutdown = true)
+    @RobotListenerHandler(order = 1, concurrency = true, shutdown = true)
     public void getRandomImage(ReceivedGroupMessage receivedGroupMessage) {
         if (receivedGroupMessage.getRaw_message().equals(CQ_Generator_Utils.getAtString(qq)) || receivedGroupMessage.getRaw_message().equals(CQ_Generator_Utils.getAtString(qq) + " ")) {
             getRandomImage(receivedGroupMessage.getGroup_id());
@@ -110,6 +114,28 @@ public class GroupMessageListener {
         }
     }
 
+    @RobotListenerHandler(order = 0, shutdown = true)
+    public void getJx3RoleDetatilPicture(ReceivedGroupMessage receivedGroupMessage) {
+        if (receivedGroupMessage.getRaw_message().startsWith("查询 ")) {
+            int group_id = receivedGroupMessage.getGroup_id();
+            String raw_message = receivedGroupMessage.getRaw_message();
+            String[] parts = raw_message.split(" ");
+            String picture_url = null;
+            if (parts.length == 2) {
+                picture_url = jx3Service.get_role_info_picture(parts[1]);
+            } else if (parts.length == 3) {
+                picture_url = jx3Service.get_role_info_picture(parts[2], parts[1]);
+            }
+
+            if (picture_url != null) {
+                gocqService.send_group_message(group_id, CQ_Generator_Utils.getImageString(picture_url));
+            } else {
+                gocqService.send_group_message(group_id, "查询失败");
+            }
+
+            messageBreaker.setMessageBreakCode(MessageBreakCode.BREAK);
+        }
+    }
 
 
     public void getRandomImage(int group_id) {

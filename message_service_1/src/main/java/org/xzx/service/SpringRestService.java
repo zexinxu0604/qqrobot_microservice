@@ -5,6 +5,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,8 +37,9 @@ public class SpringRestService {
     public <T> T postWithObject(String url, HttpHeaders headers, Object param, Class<T> responseType) {
         // 设置ContentType
         headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Object> request = new HttpEntity<>(param, headers);
         // post请求并返回
-        return restTemplate.postForObject(url, param, responseType);
+        return restTemplate.postForObject(url, request, responseType);
     }
 
     public <T> T postWithJson(String url, JsonNode param, Class<T> responseType) {

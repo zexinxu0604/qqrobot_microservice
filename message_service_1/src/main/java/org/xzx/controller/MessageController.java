@@ -18,7 +18,6 @@ public class MessageController {
     @RequestMapping("/message")
     public String test(@RequestBody JsonNode jsonNode, HttpServletRequest request) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
-        System.out.println(jsonNode);
         if (jsonNode.get("post_type").asText().equals("message")) {
             if (jsonNode.get("message_type").asText().equals("group")) {
                 ReceivedGroupMessage groupMessage = mapper.treeToValue(jsonNode, ReceivedGroupMessage.class);
@@ -41,7 +40,6 @@ public class MessageController {
     public void handler_group_message(HttpServletRequest request) {
         ReceivedGroupMessage groupMessage = (ReceivedGroupMessage) request.getAttribute("message");
         HandlerResolver.handleEvent(groupMessage);
-        System.out.println(groupMessage.getMessage());
     }
 
     @RequestMapping("/privateMessage")
@@ -49,7 +47,6 @@ public class MessageController {
     public void handler_private_message(HttpServletRequest request) {
         ReceivedPrivateMessage receivedPrivateMessage = (ReceivedPrivateMessage) request.getAttribute("message");
         HandlerResolver.handleEvent(receivedPrivateMessage);
-        System.out.println(request.getAttribute("message"));
     }
 
     @RequestMapping("/null")
