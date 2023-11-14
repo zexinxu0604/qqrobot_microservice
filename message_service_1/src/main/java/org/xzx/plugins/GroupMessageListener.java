@@ -114,29 +114,6 @@ public class GroupMessageListener {
         }
     }
 
-    @RobotListenerHandler(order = 0, shutdown = true)
-    public void getJx3RoleDetatilPicture(ReceivedGroupMessage receivedGroupMessage) {
-        if (receivedGroupMessage.getRaw_message().startsWith("查询 ")) {
-            int group_id = receivedGroupMessage.getGroup_id();
-            String raw_message = receivedGroupMessage.getRaw_message();
-            String[] parts = raw_message.split(" ");
-            String picture_url = null;
-            if (parts.length == 2) {
-                picture_url = jx3Service.get_role_info_picture(parts[1]);
-            } else if (parts.length == 3) {
-                picture_url = jx3Service.get_role_info_picture(parts[2], parts[1]);
-            }
-
-            if (picture_url != null) {
-                gocqService.send_group_message(group_id, CQ_Generator_Utils.getImageString(picture_url));
-            } else {
-                gocqService.send_group_message(group_id, "查询失败");
-            }
-
-            messageBreaker.setMessageBreakCode(MessageBreakCode.BREAK);
-        }
-    }
-
 
     public void getRandomImage(int group_id) {
         ImageResponse imageResponse = imageClient.getRandomImage();
