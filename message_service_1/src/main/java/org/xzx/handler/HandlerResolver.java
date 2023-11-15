@@ -15,6 +15,7 @@ import java.lang.reflect.Parameter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 
@@ -27,7 +28,7 @@ public class HandlerResolver {
 
     private static ThreadPoolTaskExecutor threadPoolTaskExecutor = null;
 
-    private static MessageBreaker messageBreaker = null;
+    private static AtomicReference<MessageBreaker> messageBreaker = null;
 
 
     public HandlerResolver(Object bean, BeanFactory factory, Method... declaredMethods) {
@@ -35,7 +36,7 @@ public class HandlerResolver {
         this.factory = factory;
         this.declaredMethods = declaredMethods;
         threadPoolTaskExecutor = (ThreadPoolTaskExecutor) factory.getBean("taskExecutor");
-        messageBreaker = (MessageBreaker) factory.getBean("messageBreaker");
+        messageBreaker = (AtomicReference<MessageBreaker>) factory.getBean("messageBreaker");
         this.resolve();
     }
 
@@ -77,6 +78,7 @@ public class HandlerResolver {
         }
     }
 
+    //TODO 问题：在多线程的条件下，如果访问较为频繁，线程无法及时改变messageBreaker的状态，可能会导致下次访问时，messageBreaker被改变，使循环中止
     public static void handleEvent(Message message) {
         for (Class<? extends Message> messageClazz: handlers.keySet()){
             if (messageClazz.isAssignableFrom(message.getClass())) {
@@ -89,11 +91,12 @@ public class HandlerResolver {
                     } else {
                         handler.accept(message);
                     }
-                    if (handler.annotation().shutdown() && messageBreaker.isBreak()){
+                    System.out.println(messageBreaker);
+                    if (handler.annotation().shutdown() && messageBreaker.get().isBreak()){
                         break;
                     }
                 }
-                messageBreaker.setMessageBreakCode(MessageBreakCode.CONTINUE);
+                messageBreaker.get().setMessageBreakCode(MessageBreakCode.CONTINUE);
             }
         }
     }

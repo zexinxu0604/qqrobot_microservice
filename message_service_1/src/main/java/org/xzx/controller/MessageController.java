@@ -39,6 +39,7 @@ public class MessageController {
     @ResponseBody
     public void handler_group_message(HttpServletRequest request) {
         ReceivedGroupMessage groupMessage = (ReceivedGroupMessage) request.getAttribute("message");
+        System.out.println(groupMessage.getRaw_message());
         HandlerResolver.handleEvent(groupMessage);
     }
 

@@ -11,7 +11,6 @@ import org.xzx.bean.enums.MessageBreakCode;
 import org.xzx.bean.messageBean.ReceivedGroupMessage;
 import org.xzx.bean.messageUtil.MessageBreaker;
 import org.xzx.bean.messageUtil.MessageCounter;
-import org.xzx.clients.ImageClient;
 import org.xzx.service.Gocq_service;
 import org.xzx.service.GroupImageService;
 import org.xzx.service.Jx3_service;
@@ -19,12 +18,11 @@ import org.xzx.utils.AliyunOSSUtils;
 import org.xzx.utils.CQ_Generator_Utils;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 @RobotListener
 @Log4j2
 public class Jx3GroupMessageListener {
-    @Resource
-    private ImageClient imageClient;
 
     @Autowired
     private Gocq_service gocqService;
@@ -45,7 +43,7 @@ public class Jx3GroupMessageListener {
     private Map<Integer, MessageCounter> messageCounterMap;
 
     @Autowired
-    private MessageBreaker messageBreaker;
+    private AtomicReference<MessageBreaker> messageBreaker;
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true)
     public void getJx3RoleDetatilPicture(ReceivedGroupMessage receivedGroupMessage) {
@@ -59,7 +57,6 @@ public class Jx3GroupMessageListener {
             } else if (parts.length == 3) {
                 jx3PictureUrlResponse = jx3Service.get_role_info_picture(parts[2], parts[1]);
             }
-
             catchJx3PictureResponseAndReturn(group_id, jx3PictureUrlResponse);
         }
     }
@@ -92,6 +89,5 @@ public class Jx3GroupMessageListener {
         } else {
             gocqService.send_group_message(group_id, jx3PictureUrlResponse.getMsg());
         }
-        messageBreaker.setMessageBreakCode(MessageBreakCode.BREAK);
     }
 }

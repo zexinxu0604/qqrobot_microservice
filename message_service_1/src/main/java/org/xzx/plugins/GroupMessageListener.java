@@ -1,17 +1,15 @@
 package org.xzx.plugins;
 
-import jakarta.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.xzx.annotation.RobotListener;
 import org.xzx.annotation.RobotListenerHandler;
 import org.xzx.bean.enums.*;
+import org.xzx.bean.messageBean.ReceivedGroupMessage;
 import org.xzx.bean.messageUtil.MessageBreaker;
 import org.xzx.bean.messageUtil.MessageCounter;
 import org.xzx.bean.response.*;
-import org.xzx.clients.ImageClient;
-import org.xzx.bean.messageBean.ReceivedGroupMessage;
 import org.xzx.service.Gocq_service;
 import org.xzx.service.GroupImageService;
 import org.xzx.service.Jx3_service;
@@ -21,6 +19,7 @@ import org.xzx.utils.CQ_String_Utils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 //TODO 设置功能在群聊里的权限
@@ -28,8 +27,6 @@ import java.util.Map;
 @Log4j2
 public class GroupMessageListener {
 
-    @Resource
-    private ImageClient imageClient;
 
     @Autowired
     private Gocq_service gocqService;
@@ -50,7 +47,7 @@ public class GroupMessageListener {
     private Map<Integer, MessageCounter> messageCounterMap;
 
     @Autowired
-    private MessageBreaker messageBreaker;
+    private AtomicReference<MessageBreaker> messageBreaker;
 
     @RobotListenerHandler(order = -1)
     public void countMessage(ReceivedGroupMessage receivedGroupMessage) {
@@ -72,14 +69,14 @@ public class GroupMessageListener {
             long group_id = receivedGroupMessage.getGroup_id();
             if (CQ_String_Utils.ifStaredImage(imagecq)) {
                 String imageUrl = CQ_String_Utils.getImageURL(imagecq);
-                ApiResponse<CheckImageResponse> checkImageResponseApiResponse = imageClient.checkUrl(imageUrl, poster, group_id);
+                ApiResponse<CheckImageResponse> checkImageResponseApiResponse = groupImageService.checkUrl(imageUrl, poster, group_id);
                 if (checkImageResponseApiResponse.getCode() == ApiResultCode.SUCCESS.getCode() && checkImageResponseApiResponse.getData().getCode() == CheckImageResponseCode.IMAGE_DOWNLOAD_SUCCESS.getCode()) {
                     gocqService.send_group_message(receivedGroupMessage.getGroup_id(), "没见过，偷了");
                 } else if (checkImageResponseApiResponse.getCode() == ApiResultCode.SUCCESS.getCode() && checkImageResponseApiResponse.getData().getCode() == CheckImageResponseCode.IMAGE_DOWNLOAD_FAILED.getCode()) {
                     gocqService.send_group_message(receivedGroupMessage.getGroup_id(), "没见过，但没偷成");
                 }
             }
-            messageBreaker.setMessageBreakCode(MessageBreakCode.BREAK);
+            messageBreaker.get().setMessageBreakCode(MessageBreakCode.BREAK);
         }
     }
 
@@ -100,7 +97,7 @@ public class GroupMessageListener {
         } catch (Exception e) {
             log.error("在处理回复消息中出现问题", e);
         } finally {
-            messageBreaker.setMessageBreakCode(MessageBreakCode.BREAK);
+            messageBreaker.get().setMessageBreakCode(MessageBreakCode.BREAK);
         }
 
     }
@@ -108,15 +105,15 @@ public class GroupMessageListener {
 
     @RobotListenerHandler(order = 1, concurrency = true, shutdown = true)
     public void getRandomImage(ReceivedGroupMessage receivedGroupMessage) {
+        log.info(receivedGroupMessage.getRaw_message());
         if (receivedGroupMessage.getRaw_message().equals(CQ_Generator_Utils.getAtString(qq)) || receivedGroupMessage.getRaw_message().equals(CQ_Generator_Utils.getAtString(qq) + " ")) {
             getRandomImage(receivedGroupMessage.getGroup_id());
-            messageBreaker.setMessageBreakCode(MessageBreakCode.BREAK);
         }
     }
 
 
     public void getRandomImage(int group_id) {
-        ImageResponse imageResponse = imageClient.getRandomImage();
+        ImageResponse imageResponse = groupImageService.getRandomImage();
         System.out.println(imageResponse.getUrl());
         if (imageResponse.getType() == 0) {
             gocqService.send_group_message(group_id, CQ_Generator_Utils.getImageString(imageResponse.getUrl()));
@@ -164,7 +161,7 @@ public class GroupMessageListener {
     }
 
     private void handleAddImage(String raw_picture_url, int group_id, long poster) {
-        ApiResponse<CheckImageResponse> response = imageClient.checkUrl(raw_picture_url, poster, group_id);
+        ApiResponse<CheckImageResponse> response = groupImageService.checkUrl(raw_picture_url, poster, group_id);
         if (response.getCode() == ApiResultCode.SUCCESS.getCode() && response.getData().getCode() == CheckImageResponseCode.IMAGE_DOWNLOAD_SUCCESS.getCode()) {
             gocqService.send_group_message(group_id, "没见过，偷了");
         } else if (response.getCode() == ApiResultCode.SUCCESS.getCode() && response.getData().getCode() == CheckImageResponseCode.IMAGE_DOWNLOAD_FAILED.getCode()) {
