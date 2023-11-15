@@ -1,4 +1,4 @@
-package org.xzx.bean.Jx3Response;
+package org.xzx.bean.Jx3.Jx3Response;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.AllArgsConstructor;

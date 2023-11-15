@@ -1,22 +1,19 @@
-package org.xzx.bean.jx3RequestBean;
+package org.xzx.bean.Jx3.jx3pictureRequestBean;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor
-public class Jx3TeamRecruitPictureRequest {
+public class Jx3TeamRecruitPictureRequest extends Jx3BasicPictureRequest{
     private String server;
     private String keyword;
-    private int scale;
-    private String robot;
-    private int cache;
 
     public Jx3TeamRecruitPictureRequest(String server, String keyword, String robot) {
+        super(robot);
         this.server = server;
         this.keyword = keyword;
-        this.robot = robot;
-        this.scale = 1;
-        this.cache = 0;
     }
 }
