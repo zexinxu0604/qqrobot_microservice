@@ -135,6 +135,18 @@ public class Jx3GroupMessageListener {
     }
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true)
+    public void getJx3BlackTradePicture(ReceivedGroupMessage receivedGroupMessage) {
+        if (receivedGroupMessage.getRaw_message().startsWith("价格 ")) {
+            int group_id = receivedGroupMessage.getGroup_id();
+            String raw_message = receivedGroupMessage.getRaw_message();
+            String[] parts = raw_message.split(" ");
+            Jx3PictureUrlResponse jx3PictureUrlResponse = null;
+            jx3PictureUrlResponse = jx3Service.get_black_trade_picture(parts[1]);
+            catchJx3PictureResponseAndReturn(group_id, jx3PictureUrlResponse);
+        }
+    }
+
+    @RobotListenerHandler(order = 0, shutdown = true, concurrency = true)
     public void getJx3DailyPicture(ReceivedGroupMessage receivedGroupMessage) {
         String raw_message = receivedGroupMessage.getRaw_message();
         int group_id = receivedGroupMessage.getGroup_id();
@@ -149,6 +161,27 @@ public class Jx3GroupMessageListener {
             Jx3PictureUrlResponse jx3PictureUrlResponse = null;
             if (parts.length == 2) {
                 jx3PictureUrlResponse = jx3Service.get_daily_picture(parts[1]);
+                catchJx3PictureResponseAndReturn(group_id, jx3PictureUrlResponse);
+                return;
+            }
+        }
+    }
+
+    @RobotListenerHandler(order = 0, shutdown = true, concurrency = true)
+    public void getJx3GoldPrice(ReceivedGroupMessage receivedGroupMessage) {
+        String raw_message = receivedGroupMessage.getRaw_message();
+        int group_id = receivedGroupMessage.getGroup_id();
+        if (raw_message.equals("金价")) {
+            Jx3PictureUrlResponse jx3PictureUrlResponse = jx3Service.get_gold_price();
+            catchJx3PictureResponseAndReturn(group_id, jx3PictureUrlResponse);
+            return;
+        }
+
+        if (raw_message.startsWith("金价 ")) {
+            String[] parts = raw_message.split(" ");
+            Jx3PictureUrlResponse jx3PictureUrlResponse = null;
+            if (parts.length == 2) {
+                jx3PictureUrlResponse = jx3Service.get_gold_price(parts[1]);
                 catchJx3PictureResponseAndReturn(group_id, jx3PictureUrlResponse);
                 return;
             }

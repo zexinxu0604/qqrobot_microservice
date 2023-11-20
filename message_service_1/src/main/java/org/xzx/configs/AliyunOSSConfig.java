@@ -1,5 +1,6 @@
 package org.xzx.configs;
 
+import com.aliyun.oss.ClientBuilderConfiguration;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.common.auth.CredentialsProvider;
@@ -21,7 +22,11 @@ public class AliyunOSSConfig {
     @Bean("AliyunOSSClient")
     public OSS ossClient() {
         String endpoint = "oss-cn-beijing.aliyuncs.com";
+        String domain = "zzgroupimages.cn";
         CredentialsProvider credentialsProvider = new DefaultCredentialProvider(accesskey, accessSecret);
-        return new OSSClientBuilder().build(endpoint, credentialsProvider);
+        ClientBuilderConfiguration conf = new ClientBuilderConfiguration();
+// 设置是否支持CNAME。CNAME用于将自定义域名绑定到目标Bucket。
+        conf.setSupportCname(true);
+        return new OSSClientBuilder().build(domain, credentialsProvider, conf);
     }
 }

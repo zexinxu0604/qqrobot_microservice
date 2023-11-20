@@ -16,4 +16,6 @@ public class Jx3DailyPictureRequest extends Jx3BasicPictureRequest{
         super(robot);
         this.server = server;
     }
+
+
 }

@@ -91,6 +91,18 @@ public class Jx3_service {
         }
     }
 
+    public Jx3PictureUrlResponse get_black_trade_picture(String key_word) {
+        Jx3BossTreasurePictureRequest jx3BossTreasurePictureRequest = new Jx3BossTreasurePictureRequest("", key_word, robot_name);
+        Jx3PictureUrlResponse jx3PictureUrlResponse = springRestService.postWithObject(jx3_url + "view/trade/record", headers_with_token_v1, jx3BossTreasurePictureRequest, Jx3PictureUrlResponse.class);
+        try {
+            return jx3PictureUrlResponse;
+        } catch (NullPointerException e) {
+            log.error("获取黑市信息失败", e);
+            return null;
+        }
+    }
+
+
     public Jx3PictureUrlResponse get_boss_treasure_picture(String key_word) {
         return get_boss_treasure_picture(key_word, "破阵子");
     }
@@ -117,7 +129,7 @@ public class Jx3_service {
         }
     }
 
-    public Jx3PictureUrlResponse get_firework_picture(String role_name, String server){
+    public Jx3PictureUrlResponse get_firework_picture(String role_name, String server) {
         Jx3RolePictureRequest jx3RolePictureRequest = new Jx3RolePictureRequest(server, role_name, robot_name, ticket);
         Jx3PictureUrlResponse jx3PictureUrlResponse = springRestService.postWithObject(jx3_url + "view/watch/record", headers_with_token_v2, jx3RolePictureRequest, Jx3PictureUrlResponse.class);
         try {
@@ -127,11 +139,16 @@ public class Jx3_service {
             return null;
         }
     }
-    public Jx3PictureUrlResponse get_firework_picture(String role_name){
+
+    public Jx3PictureUrlResponse get_firework_picture(String role_name) {
         return get_firework_picture(role_name, "破阵子");
     }
 
-    public Jx3PictureUrlResponse get_daily_picture(String server){
+    public Jx3PictureUrlResponse get_daily_picture() {
+        return get_daily_picture("破阵子");
+    }
+
+    public Jx3PictureUrlResponse get_daily_picture(String server) {
         Jx3DailyPictureRequest jx3DailyPictureRequest = new Jx3DailyPictureRequest(server);
         Jx3PictureUrlResponse jx3PictureUrlResponse = springRestService.postWithObject(jx3_url + "view/active/current", jx3DailyPictureRequest, Jx3PictureUrlResponse.class);
         try {
@@ -141,11 +158,23 @@ public class Jx3_service {
             return null;
         }
     }
-    public Jx3PictureUrlResponse get_daily_picture(){
-        return get_daily_picture("破阵子");
+
+    public Jx3PictureUrlResponse get_gold_price() {
+        return get_gold_price("破阵子");
     }
 
-    public Boolean get_server_open_status(String server){
+    public Jx3PictureUrlResponse get_gold_price(String server) {
+        Jx3DailyPictureRequest jx3DailyPictureRequest = new Jx3DailyPictureRequest(server, robot_name);
+        Jx3PictureUrlResponse jx3PictureUrlResponse = springRestService.postWithObject(jx3_url + "view/trade/demon", headers_with_token_v1, jx3DailyPictureRequest, Jx3PictureUrlResponse.class);
+        try {
+            return jx3PictureUrlResponse;
+        } catch (NullPointerException e) {
+            log.error("获取日常失败", e);
+            return null;
+        }
+    }
+
+    public Boolean get_server_open_status(String server) {
         Jx3DailyPictureRequest jx3DailyPictureRequest = new Jx3DailyPictureRequest(server);
         JsonNode jsonNode = springRestService.postWithObject(jx3_url + "data/server/check", jx3DailyPictureRequest, JsonNode.class);
         try {
@@ -156,7 +185,7 @@ public class Jx3_service {
         }
     }
 
-    public Boolean get_server_open_status(){
+    public Boolean get_server_open_status() {
         return get_server_open_status("破阵子");
     }
 

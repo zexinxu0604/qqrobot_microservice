@@ -7,6 +7,6 @@ import org.springframework.context.annotation.Configuration;
 public class Jx3Configs {
     @Bean("jx3ServerOpenStatus")
     public Boolean jx3ServerOpenStatus() {
-        return false;
+        return true;
     }
 }

@@ -36,8 +36,6 @@ public class AliyunOSSUtils {
             req.setExpiration(expiration);
 
             ResponseHeaderOverrides responseHeaderOverrides = new ResponseHeaderOverrides();
-            responseHeaderOverrides.setContentType(getImageContentType(url).toString().toUpperCase());
-            responseHeaderOverrides.setContentDisposition("inline");
             req.setResponseHeaders(responseHeaderOverrides);
 
             URL oss_url = ossClient.generatePresignedUrl(req);
