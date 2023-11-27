@@ -16,6 +16,7 @@ import org.xzx.service.Jx3_service;
 import org.xzx.utils.AliyunOSSUtils;
 import org.xzx.utils.CQ_Generator_Utils;
 import org.xzx.utils.CQ_String_Utils;
+import org.xzx.utils.String_Utils;
 
 import java.util.List;
 import java.util.Map;
@@ -60,6 +61,11 @@ public class GroupMessageListener {
         }
     }
 
+    /**
+     * Check if the received group message contains an image and process it accordingly.
+     *
+     * @param receivedGroupMessage the received group message object
+     */
     @RobotListenerHandler(order = 1, shutdown = true)
     public void checkImage(ReceivedGroupMessage receivedGroupMessage) {
         if (receivedGroupMessage.getRaw_message().startsWith("[CQ:image,")) {
@@ -137,6 +143,8 @@ public class GroupMessageListener {
             handleRestoreImage(raw_picture_url, group_id);
         } else if (raw_message.endsWith("添加图片")) {
             handleAddImage(raw_picture_url, group_id, poster);
+        } else if (raw_message.endsWith("查看图片")) {
+            gocqService.send_group_message(group_id, CQ_Generator_Utils.getImageString(raw_picture_url) + "\n" + raw_picture_url);
         }
     }
 
