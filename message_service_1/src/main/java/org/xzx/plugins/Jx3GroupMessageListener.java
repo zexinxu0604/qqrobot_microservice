@@ -40,6 +40,9 @@ public class Jx3GroupMessageListener {
     @Autowired
     private Map<Long, MessageCounter> messageCounterMap;
 
+    @Autowired
+    private ThreadLocal<MessageBreaker> messageBreaker;
+
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true)
     public void getJx3RoleDetatilPicture(ReceivedGroupMessage receivedGroupMessage) {

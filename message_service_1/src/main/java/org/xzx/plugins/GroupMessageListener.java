@@ -2,15 +2,14 @@ package org.xzx.plugins;
 
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.xzx.annotation.RobotListener;
 import org.xzx.annotation.RobotListenerHandler;
 import org.xzx.bean.ImageBean.ImageCQ;
-import org.xzx.bean.enums.ApiResultCode;
-import org.xzx.bean.enums.CheckImageResponseCode;
-import org.xzx.bean.enums.DeleteImageResponseCode;
-import org.xzx.bean.enums.RestoreImageResponseCode;
+import org.xzx.bean.enums.*;
 import org.xzx.bean.messageBean.ReceivedGroupMessage;
+import org.xzx.bean.messageUtil.MessageBreaker;
 import org.xzx.bean.messageUtil.MessageCounter;
 import org.xzx.bean.response.*;
 import org.xzx.service.ChatAIService;
@@ -55,6 +54,10 @@ public class GroupMessageListener {
 
     @Autowired
     private Map<Long, MessageCounter> messageCounterMap;
+
+    @Autowired
+    @Qualifier("messageBreaker")
+    private ThreadLocal<MessageBreaker> messageBreaker;
 
     @RobotListenerHandler(order = -1)
     public void countMessage(ReceivedGroupMessage receivedGroupMessage) {
@@ -120,7 +123,6 @@ public class GroupMessageListener {
         } catch (Exception e) {
             log.error("在处理回复消息中出现问题", e);
         }
-
     }
 
 
@@ -134,7 +136,7 @@ public class GroupMessageListener {
 
     @RobotListenerHandler(order = 2, concurrency = true)
     public void getAIResponse(ReceivedGroupMessage receivedGroupMessage){
-        if (receivedGroupMessage.getRaw_message().startsWith(CQ_Generator_Utils.getAtString(qq))) {
+        if (receivedGroupMessage.getRaw_message().startsWith(CQ_Generator_Utils.getAtString(qq)) && !CQ_Generator_Utils.getAtString(qq).equals(receivedGroupMessage.getRaw_message())) {
             String message = receivedGroupMessage.getRaw_message().replace(CQ_Generator_Utils.getAtString(qq), "");
             String response = chatAIService.getChatAIResponse(message);
             gocqService.send_group_message(receivedGroupMessage.getGroup_id(), response);

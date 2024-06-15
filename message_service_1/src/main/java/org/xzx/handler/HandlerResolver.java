@@ -82,8 +82,6 @@ public class HandlerResolver {
     public static void handleEvent(Message message) {
         PriorityQueue<EventHandler> queue = handlers.getOrDefault(message.getClass(), null);
         if (queue != null){
-            MessageBreaker messageBreaker1 = new MessageBreaker(MessageBreakCode.CONTINUE);
-            messageBreaker.set(messageBreaker1);
             for(EventHandler handler: queue){
                 if (handler.annotation().concurrency()) {
                     threadPoolTaskExecutor.execute(() -> {
@@ -91,9 +89,6 @@ public class HandlerResolver {
                     });
                 } else {
                     handler.accept(message);
-                }
-                if (handler.annotation().shutdown()) {
-                    messageBreaker.get().setMessageBreakCode(MessageBreakCode.BREAK);
                 }
             }
         }
