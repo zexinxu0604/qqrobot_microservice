@@ -95,7 +95,6 @@ public class HandlerResolver {
                 if (handler.annotation().shutdown()) {
                     messageBreaker.get().setMessageBreakCode(MessageBreakCode.BREAK);
                 }
-
             }
         }
     }

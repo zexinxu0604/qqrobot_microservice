@@ -13,6 +13,7 @@ import org.xzx.bean.enums.RestoreImageResponseCode;
 import org.xzx.bean.messageBean.ReceivedGroupMessage;
 import org.xzx.bean.messageUtil.MessageCounter;
 import org.xzx.bean.response.*;
+import org.xzx.service.ChatAIService;
 import org.xzx.service.Gocq_service;
 import org.xzx.service.GroupImageService;
 import org.xzx.service.Jx3_service;
@@ -48,6 +49,9 @@ public class GroupMessageListener {
 
     @Autowired
     private AliyunOSSUtils aliyunOSSUtils;
+
+    @Autowired
+    private ChatAIService chatAIService;
 
     @Autowired
     private Map<Long, MessageCounter> messageCounterMap;
@@ -125,6 +129,15 @@ public class GroupMessageListener {
         log.info(receivedGroupMessage.getRaw_message());
         if (receivedGroupMessage.getRaw_message().equals(CQ_Generator_Utils.getAtString(qq)) || receivedGroupMessage.getRaw_message().equals(CQ_Generator_Utils.getAtString(qq) + " ")) {
             getRandomImage(receivedGroupMessage.getGroup_id());
+        }
+    }
+
+    @RobotListenerHandler(order = 2, concurrency = true)
+    public void getAIResponse(ReceivedGroupMessage receivedGroupMessage){
+        if (receivedGroupMessage.getRaw_message().startsWith(CQ_Generator_Utils.getAtString(qq))) {
+            String message = receivedGroupMessage.getRaw_message().replace(CQ_Generator_Utils.getAtString(qq), "");
+            String response = chatAIService.getChatAIResponse(message);
+            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), response);
         }
     }
 
