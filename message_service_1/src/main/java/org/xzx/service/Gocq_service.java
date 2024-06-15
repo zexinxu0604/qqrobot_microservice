@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 import org.xzx.bean.messageBean.Send_Message.SendGroupMessage;
 import org.xzx.bean.messageBean.Send_Message.PrivateMessage;
@@ -13,6 +14,7 @@ import org.xzx.bean.qqGroupBean.GroupInfo;
 import java.util.List;
 
 @Service
+@RefreshScope
 public class Gocq_service {
 
     @Autowired
