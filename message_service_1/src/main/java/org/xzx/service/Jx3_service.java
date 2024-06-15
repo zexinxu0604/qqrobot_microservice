@@ -165,6 +165,12 @@ public class Jx3_service {
         return get_gold_price("破阵子");
     }
 
+    /**
+     * Retrieves the current gold price for a given server.
+     *
+     * @param server The name of the server.
+     * @return The response containing the gold price information. Returns null if the daily picture request fails.
+     */
     public Jx3PictureUrlResponse get_gold_price(String server) {
         Jx3DailyPictureRequest jx3DailyPictureRequest = new Jx3DailyPictureRequest(server, robot_name);
         Jx3PictureUrlResponse jx3PictureUrlResponse = springRestService.postWithObject(jx3_url + "view/trade/demon", headers_with_token_v1, jx3DailyPictureRequest, Jx3PictureUrlResponse.class);
