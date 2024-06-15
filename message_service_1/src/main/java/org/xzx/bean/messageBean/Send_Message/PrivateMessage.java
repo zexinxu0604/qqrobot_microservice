@@ -14,7 +14,7 @@ public class PrivateMessage {
 
     private boolean auto_escape = false;
 
-    public PrivateMessage(int userId, String message) {
+    public PrivateMessage(long userId, String message) {
         this.user_id = userId;
         this.message = message;
     }

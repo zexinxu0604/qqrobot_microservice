@@ -17,7 +17,7 @@ import lombok.experimental.SuperBuilder;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ReceivedPrivateMessage extends Message{
 
-    private int target_id;
+    private long target_id;
 
     private int temp_source = 0;
 

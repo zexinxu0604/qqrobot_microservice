@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GroupInfo {
-    private int group_id;
+    private long group_id;
 
     private String group_name;
 

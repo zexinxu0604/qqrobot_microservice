@@ -44,8 +44,18 @@ public class CQ_String_Utils {
      */
     public static String getImageURL(String str) {
         String url = str.substring(str.indexOf("url=") + 4, str.indexOf("]"));
-        String[] urlList = url.split("&amp;");
-        return urlList[0];
+        url = url.replace("amp;", "");
+        return url;
+    }
+
+    /**
+     *
+     * @param str [CQ:image,file=2e6a4fdc0bedc592fec7494d72f0d3d5.image,subType=1,url=https://gchat.qpic.cn/gchatpic_new/xx/xx-xx-2E6A4FDC0BEDC592FEC7494D72F0D3D5/0?term=2&amp;is_origin=0]
+     * @return 2e6a4fdc0bedc592fec7494d72f0d3d5.image
+     * @description 获取图片的文件名
+     */
+    public static String getImageFileName(String str){
+        return str.substring(str.indexOf("file=") + 5, str.indexOf(",url="));
     }
 
     /**
@@ -95,6 +105,10 @@ public class CQ_String_Utils {
         List<String> cqStrings = CQ_String_Utils.getCQStrings(str);
         String replycq = cqStrings.get(0);
         return Integer.parseInt(CQ_String_Utils.getIdFromReply(replycq));
+    }
+
+    public static int getImageFileSize(String str){
+        return Integer.parseInt(str.substring(str.indexOf("file_size=") + 10, str.indexOf("]")));
     }
 
 }

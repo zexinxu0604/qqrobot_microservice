@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class MessageCounter {
-    private int group_id;
+    private long group_id;
 
     private int messageCount;
 

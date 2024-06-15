@@ -8,13 +8,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SendGroupMessage {
-    private int group_id;
+    private long group_id;
 
     private String message;
 
     private boolean auto_escape = false;
 
-    public SendGroupMessage(int groupId, String message) {
+    public SendGroupMessage(long groupId, String message) {
         this.group_id = groupId;
         this.message = message;
     }

@@ -16,6 +16,6 @@ import lombok.experimental.SuperBuilder;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PrivateMessageSender extends BasicSender {
 
-    private int group_id = 0;
+    private long group_id = 0;
 
 }

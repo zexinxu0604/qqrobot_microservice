@@ -17,7 +17,7 @@ import lombok.experimental.SuperBuilder;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ReceivedGroupMessage extends Message{
 
-    private int group_id;
+    private long group_id;
 
     private AnonymousMessage anonymous = null;
 

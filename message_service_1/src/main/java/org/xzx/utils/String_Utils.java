@@ -11,6 +11,10 @@ public class String_Utils {
         return str.substring(str.lastIndexOf("-") + 1, str.lastIndexOf("/"));
     }
 
+    public static String getFileName(String str){
+        return str.split("\\.")[0];
+    }
+
     public static String getNewUrl(String str) {
         int lastIndex = str.lastIndexOf("/");
         int secondIndex = str.substring(0, lastIndex).lastIndexOf("/");

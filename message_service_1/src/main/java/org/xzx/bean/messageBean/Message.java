@@ -22,7 +22,7 @@ public class Message {
 
     private String sub_type;
 
-    private int message_id;
+    private long message_id;
 
     private long user_id;
 

@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @Configuration
 public class MessageBreakerConfig {
     @Bean("messageBreaker")
-    public AtomicReference<MessageBreaker> messageBreaker() {
-        return new AtomicReference<>(new MessageBreaker(MessageBreakCode.CONTINUE));
+    public ThreadLocal<MessageBreaker> messageBreaker() {
+        return new ThreadLocal<MessageBreaker>();
     }
 }

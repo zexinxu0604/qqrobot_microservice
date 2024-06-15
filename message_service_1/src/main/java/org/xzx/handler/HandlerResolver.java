@@ -28,7 +28,7 @@ public class HandlerResolver {
 
     private static ThreadPoolTaskExecutor threadPoolTaskExecutor = null;
 
-    private static AtomicReference<MessageBreaker> messageBreaker = null;
+    private static ThreadLocal<MessageBreaker> messageBreaker = null;
 
 
     public HandlerResolver(Object bean, BeanFactory factory, Method... declaredMethods) {
@@ -36,7 +36,7 @@ public class HandlerResolver {
         this.factory = factory;
         this.declaredMethods = declaredMethods;
         threadPoolTaskExecutor = (ThreadPoolTaskExecutor) factory.getBean("taskExecutor");
-        messageBreaker = (AtomicReference<MessageBreaker>) factory.getBean("messageBreaker");
+        messageBreaker = (ThreadLocal<MessageBreaker>) factory.getBean("messageBreaker");
         this.resolve();
     }
 
@@ -80,23 +80,22 @@ public class HandlerResolver {
 
     //TODO 问题：在多线程的条件下，如果访问较为频繁，线程无法及时改变messageBreaker的状态，可能会导致下次访问时，messageBreaker被改变，使循环中止
     public static void handleEvent(Message message) {
-        for (Class<? extends Message> messageClazz: handlers.keySet()){
-            if (messageClazz.isAssignableFrom(message.getClass())) {
-                PriorityQueue<EventHandler> queue = handlers.get(messageClazz);
-                for(EventHandler handler: queue){
-                    if (handler.annotation().concurrency()) {
-                        threadPoolTaskExecutor.execute(() -> {
-                            handler.accept(message);
-                        });
-                    } else {
+        PriorityQueue<EventHandler> queue = handlers.getOrDefault(message.getClass(), null);
+        if (queue != null){
+            MessageBreaker messageBreaker1 = new MessageBreaker(MessageBreakCode.CONTINUE);
+            messageBreaker.set(messageBreaker1);
+            for(EventHandler handler: queue){
+                if (handler.annotation().concurrency()) {
+                    threadPoolTaskExecutor.execute(() -> {
                         handler.accept(message);
-                    }
-                    System.out.println(messageBreaker);
-                    if (handler.annotation().shutdown() && messageBreaker.get().isBreak()){
-                        break;
-                    }
+                    });
+                } else {
+                    handler.accept(message);
                 }
-                messageBreaker.get().setMessageBreakCode(MessageBreakCode.CONTINUE);
+                if (handler.annotation().shutdown()) {
+                    messageBreaker.get().setMessageBreakCode(MessageBreakCode.BREAK);
+                }
+
             }
         }
     }

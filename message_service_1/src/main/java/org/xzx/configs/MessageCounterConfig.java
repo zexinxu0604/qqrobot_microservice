@@ -19,10 +19,10 @@ public class MessageCounterConfig {
     @Autowired
     private Gocq_service gocqService;
     @Bean
-    public Map<Integer, MessageCounter> messageCounterMap(){
+    public Map<Long, MessageCounter> messageCounterMap(){
         List<GroupInfo> groupInfoList = gocqService.get_group_list();
         log.info("群列表：{}", groupInfoList);
-        Map<Integer, MessageCounter> messageCounterMap = new ConcurrentHashMap<>();
+        Map<Long, MessageCounter> messageCounterMap = new ConcurrentHashMap<>();
         for (GroupInfo groupInfo : groupInfoList) {
             messageCounterMap.put(groupInfo.getGroup_id(), new MessageCounter(groupInfo.getGroup_id(), 0, 20));
         }
