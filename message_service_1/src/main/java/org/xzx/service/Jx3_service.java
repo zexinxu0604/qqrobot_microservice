@@ -5,6 +5,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 import org.springframework.http.HttpHeaders;
 import org.xzx.bean.Jx3.Jx3Response.Jx3PictureUrlResponse;
@@ -13,6 +14,7 @@ import org.xzx.bean.Jx3.jx3pictureRequestBean.*;
 
 @Service
 @Log4j2
+@RefreshScope
 public class Jx3_service {
     @Autowired
     private SpringRestService springRestService;
