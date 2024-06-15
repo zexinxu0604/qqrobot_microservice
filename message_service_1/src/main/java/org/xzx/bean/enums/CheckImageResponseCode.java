@@ -6,7 +6,8 @@ import lombok.Getter;
 public enum CheckImageResponseCode {
     IMAGE_IN_DATABASE(0, "图片已存在"),
     IMAGE_DOWNLOAD_SUCCESS(1, "图片下载成功"),
-    IMAGE_DOWNLOAD_FAILED(2, "图片下载失败");
+    IMAGE_DOWNLOAD_FAILED(2, "图片下载失败"),
+    IMAGE_SIZE_TOO_LARGE(3, "图片超出大小限制");
 
     private final int code;
     private final String message;

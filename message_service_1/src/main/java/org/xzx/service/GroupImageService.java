@@ -35,6 +35,7 @@ public class GroupImageService {
     private String imagepath;
 
 
+
     public ApiResponse<DeleteImageResponse> deleteImage(ImageCQ imageCQ) {
         return deleteImageFromBase(imageCQ) ? new ApiResponse<>(ApiResultCode.SUCCESS.getCode(), ApiResultCode.SUCCESS.getMessage(), new DeleteImageResponse(DeleteImageResponseCode.IMAGE_DELETE_SUCCESS)) : new ApiResponse<>(ApiResultCode.FAILED.getCode(), ApiResultCode.FAILED.getMessage(), new DeleteImageResponse(DeleteImageResponseCode.IMAGE_DELETE_FAILED));
     }

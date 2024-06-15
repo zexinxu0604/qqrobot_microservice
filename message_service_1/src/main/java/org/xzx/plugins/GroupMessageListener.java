@@ -43,6 +43,9 @@ public class GroupMessageListener {
     @Value("${qq.number}")
     private long qq;
 
+    @Value("${qq.group.imageSaveSize}")
+    private int imagesize;
+
     @Autowired
     private AliyunOSSUtils aliyunOSSUtils;
 
@@ -72,7 +75,7 @@ public class GroupMessageListener {
             String imagecq = cqStrings.get(0);
             String imageFileName = CQ_String_Utils.getImageFileName(imagecq);
             ApiResponse<CheckImageResponse> checkImageResponseApiResponse = groupImageService.checkImageFileName(imageFileName);
-            if (checkImageResponseApiResponse.getCode() == ApiResultCode.FAILED.getCode()) {
+            if (checkImageResponseApiResponse.getCode() == ApiResultCode.FAILED.getCode() && CQ_String_Utils.getImageFileSize(imagecq) < imagesize) {
                 ImageCQ imageCQ = new ImageCQ();
                 imageCQ.setUrl(CQ_String_Utils.getImageURL(imagecq));
                 imageCQ.setGroup_id(receivedGroupMessage.getGroup_id());
