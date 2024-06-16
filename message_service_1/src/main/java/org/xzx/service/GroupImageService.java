@@ -13,6 +13,7 @@ import org.xzx.bean.enums.DeleteImageResponseCode;
 import org.xzx.bean.enums.RestoreImageResponseCode;
 import org.xzx.bean.response.*;
 import org.xzx.dao.GroupImageDao;
+import org.xzx.utils.AliyunOSSUtils;
 import org.xzx.utils.String_Utils;
 import org.xzx.utils.Url_utils;
 
@@ -34,10 +35,25 @@ public class GroupImageService {
     @Value("${qq.group.imagePath}")
     private String imagepath;
 
+    @Autowired
+    private AliyunOSSUtils aliyunOSSUtils;
 
 
     public ApiResponse<DeleteImageResponse> deleteImage(ImageCQ imageCQ) {
         return deleteImageFromBase(imageCQ) ? new ApiResponse<>(ApiResultCode.SUCCESS.getCode(), ApiResultCode.SUCCESS.getMessage(), new DeleteImageResponse(DeleteImageResponseCode.IMAGE_DELETE_SUCCESS)) : new ApiResponse<>(ApiResultCode.FAILED.getCode(), ApiResultCode.FAILED.getMessage(), new DeleteImageResponse(DeleteImageResponseCode.IMAGE_DELETE_FAILED));
+    }
+
+    public ApiResponse<DeleteImageResponse> realDeleteImage(ImageCQ imageCQ) {
+        String deletedFileName = realDeleteImageFromBase(imageCQ);
+        if (deletedFileName == null) {
+            return new ApiResponse<>(ApiResultCode.FAILED.getCode(), ApiResultCode.FAILED.getMessage(), new DeleteImageResponse(DeleteImageResponseCode.IMAGE_DELETE_FAILED));
+        }
+        boolean aliyunOssDeleteResult = aliyunOSSUtils.deleteFromOSS(deletedFileName);
+        if (aliyunOssDeleteResult) {
+            return new ApiResponse<>(ApiResultCode.SUCCESS.getCode(), ApiResultCode.SUCCESS.getMessage(), new DeleteImageResponse(DeleteImageResponseCode.IMAGE_DELETE_SUCCESS));
+        } else {
+            return new ApiResponse<>(ApiResultCode.FAILED.getCode(), ApiResultCode.FAILED.getMessage(), new DeleteImageResponse(DeleteImageResponseCode.IMAGE_DELETE_FAILED));
+        }
     }
 
     public ApiResponse<CheckImageResponse> insertImage(ImageCQ imageCQ) {
@@ -129,6 +145,15 @@ public class GroupImageService {
         GroupImage groupImage = groupImageDao.selectOne(queryWrapper);
         groupImage.setIsDel(0);
         return groupImageDao.updateById(groupImage) == 1;
+    }
+
+    public String realDeleteImageFromBase(ImageCQ imageCQ) {
+        String name = String_Utils.getFileName(imageCQ.getFile_name());
+        QueryWrapper<GroupImage> queryWrapper = new QueryWrapper<>();
+        queryWrapper.like("localurl", name);
+        GroupImage groupImage = groupImageDao.selectOne(queryWrapper);
+        groupImageDao.deleteById(groupImage.getId());
+        return groupImage == null ? null : groupImage.getLocalurl();
     }
 
     public boolean checkLocalPathExist(String localPath) {

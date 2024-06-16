@@ -58,6 +58,27 @@ public class AliyunOSSUtils {
         }
     }
 
+    public boolean deleteFromOSS(String filename){
+        try {
+            ossClient.deleteObject(bucket, filename);
+            return true;
+        } catch (OSSException oe){
+            log.error("Caught an OSSException, which means your request made it to OSS, "
+                    + "but was rejected with an error response for some reason.");
+            log.error("Error Message:" + oe.getErrorMessage());
+            log.error("Error Code:" + oe.getErrorCode());
+            log.error("Request ID:" + oe.getRequestId());
+            log.error("Host ID:" + oe.getHostId());
+            return false;
+        } catch (ClientException ce){
+            log.error("Caught an ClientException, which means the client encountered "
+                    + "a serious internal problem while trying to communicate with OSS, "
+                    + "such as not being able to access the network.");
+            log.error("Error Message:" + ce.getMessage());
+            return false;
+        }
+    }
+
     public MediaType getImageContentType(String url){
         if(url.endsWith(".png")) return MediaType.IMAGE_PNG;
         else if(url.endsWith(".jpg") || url.endsWith(".jpeg")) return MediaType.IMAGE_JPEG;

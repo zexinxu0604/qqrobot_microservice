@@ -182,7 +182,7 @@ public class GroupMessageListener {
     }
 
     private void handleDeleteImage(ImageCQ imageCQ) {
-        ApiResponse<DeleteImageResponse> response = groupImageService.deleteImage(imageCQ);
+        ApiResponse<DeleteImageResponse> response = groupImageService.realDeleteImage(imageCQ);
         if (response.getCode() == ApiResultCode.SUCCESS.getCode() && response.getData().getCode() == DeleteImageResponseCode.IMAGE_DELETE_SUCCESS.getCode()) {
             gocqService.send_group_message(imageCQ.getGroup_id(), "已删除");
         } else {
