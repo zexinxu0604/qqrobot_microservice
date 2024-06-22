@@ -4,10 +4,14 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.xzx.annotation.RobotListener;
 import org.xzx.annotation.RobotListenerHandler;
 import org.xzx.bean.ImageBean.ImageCQ;
-import org.xzx.bean.enums.*;
+import org.xzx.bean.enums.ApiResultCode;
+import org.xzx.bean.enums.CheckImageResponseCode;
+import org.xzx.bean.enums.DeleteImageResponseCode;
+import org.xzx.bean.enums.RestoreImageResponseCode;
 import org.xzx.bean.messageBean.ReceivedGroupMessage;
 import org.xzx.bean.messageUtil.MessageBreaker;
 import org.xzx.bean.messageUtil.MessageCounter;
@@ -20,7 +24,6 @@ import org.xzx.utils.AliyunOSSUtils;
 import org.xzx.utils.CQ_Generator_Utils;
 import org.xzx.utils.CQ_String_Utils;
 
-import java.awt.*;
 import java.util.List;
 import java.util.Map;
 
@@ -28,6 +31,7 @@ import java.util.Map;
 //TODO 设置功能在群聊里的权限
 @RobotListener
 @Log4j2
+@RefreshScope
 public class GroupMessageListener {
 
 
@@ -135,7 +139,7 @@ public class GroupMessageListener {
     }
 
     @RobotListenerHandler(order = 2, concurrency = true)
-    public void getAIResponse(ReceivedGroupMessage receivedGroupMessage){
+    public void getAIResponse(ReceivedGroupMessage receivedGroupMessage) {
         if (receivedGroupMessage.getRaw_message().startsWith(CQ_Generator_Utils.getAtString(qq)) && !CQ_Generator_Utils.getAtString(qq).equals(receivedGroupMessage.getRaw_message())) {
             String message = receivedGroupMessage.getRaw_message().replace(CQ_Generator_Utils.getAtString(qq), "");
             String response = chatAIService.getChatAIResponse(message);
