@@ -28,6 +28,14 @@ public @interface RobotListenerHandler {
 
     boolean shutdown() default false;
 
+    boolean isFullMatch() default false;
 
+    /**
+     * 判断是否匹配某个正则表达式
+     * @return 正则表达式
+     */
+    String regex() default "";
+
+    boolean isAllRegex() default false;
 
 }

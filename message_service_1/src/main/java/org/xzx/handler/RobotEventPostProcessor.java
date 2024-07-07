@@ -33,8 +33,6 @@ public class RobotEventPostProcessor implements BeanPostProcessor, BeanFactoryAw
                 Class<?> beanClass = bean.getClass();
                 Method[] declaredMethods = beanClass.getDeclaredMethods();
                 HandlerResolver resolver = new HandlerResolver(bean, factory, declaredMethods);
-                System.out.println("bean类型：");
-                System.out.println(bean.getClass());
             }
         }
         return bean;
