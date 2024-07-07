@@ -170,7 +170,7 @@ public class GroupMessageListener {
         if (raw_message.endsWith("删除图片")) {
             handleDeleteImage(imageCQ);
         } else if (raw_message.endsWith("恢复图片")) {
-            handleRestoreImage(imageCQ);
+            handleAddImage(imageCQ);
         } else if (raw_message.endsWith("添加图片")) {
             handleAddImage(imageCQ);
         } else if (raw_message.endsWith("查看图片")) {

@@ -3,6 +3,7 @@ package org.xzx.handler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.xzx.annotation.RobotListenerHandler;
 import org.xzx.bean.messageBean.Message;
@@ -29,6 +30,7 @@ public class HandlerResolver {
 
     private static final Map<Class<? extends Message>, Map<String, PriorityQueue<EventHandler>>> regexMessageHandlers = new HashMap<>();
 
+    
 
     public HandlerResolver(Object bean, BeanFactory factory, Method... declaredMethods) {
         this.bean = bean;
@@ -109,6 +111,9 @@ public class HandlerResolver {
         PriorityQueue<EventHandler> fullMatchQueue = fullMessageHandlers.get(message.getClass()).getOrDefault(message.getRaw_message(), null);
         if (fullMatchQueue != null) {
             for (EventHandler handler : fullMatchQueue) {
+
+
+
                 if (handler.annotation().concurrency()) {
                     threadPoolTaskExecutor.execute(() -> handler.accept(message));
                 } else {
