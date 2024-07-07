@@ -3,19 +3,16 @@ package org.xzx.handler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.xzx.annotation.RobotListenerHandler;
-import org.xzx.bean.enums.MessageBreakCode;
 import org.xzx.bean.messageBean.Message;
-import org.xzx.bean.messageUtil.MessageBreaker;
+import org.xzx.configs.Constants;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 
@@ -28,7 +25,9 @@ public class HandlerResolver {
 
     private static ThreadPoolTaskExecutor threadPoolTaskExecutor = null;
 
-    private static ThreadLocal<MessageBreaker> messageBreaker = null;
+    private static final Map<Class<? extends Message>, Map<String, PriorityQueue<EventHandler>>> fullMessageHandlers = new HashMap<>();
+
+    private static final Map<Class<? extends Message>, Map<String, PriorityQueue<EventHandler>>> regexMessageHandlers = new HashMap<>();
 
 
     public HandlerResolver(Object bean, BeanFactory factory, Method... declaredMethods) {
@@ -36,7 +35,6 @@ public class HandlerResolver {
         this.factory = factory;
         this.declaredMethods = declaredMethods;
         threadPoolTaskExecutor = (ThreadPoolTaskExecutor) factory.getBean("taskExecutor");
-        messageBreaker = (ThreadLocal<MessageBreaker>) factory.getBean("messageBreaker");
         this.resolve();
     }
 
@@ -58,9 +56,37 @@ public class HandlerResolver {
 
     private void addHandlerMethod(RobotListenerHandler annotation, Class<? extends Message> messageClazz, Method method) {
         Consumer<Message> invoke = message -> this.invokeMethod(method, message);
-        if (!handlers.containsKey(messageClazz))
-            handlers.put(messageClazz, new PriorityQueue<>(EventHandler::compareOrder));
-        handlers.get(messageClazz).offer(new EventHandler(annotation, invoke));
+        if (!fullMessageHandlers.containsKey(messageClazz)) {
+            fullMessageHandlers.put(messageClazz, new HashMap<>());
+        }
+
+        if (!regexMessageHandlers.containsKey(messageClazz)) {
+            regexMessageHandlers.put(messageClazz, new HashMap<>());
+        }
+
+        if (annotation.isFullMatch() && !fullMessageHandlers.get(messageClazz).containsKey(annotation.regex())) {
+            fullMessageHandlers.get(messageClazz).put(annotation.regex(), new PriorityQueue<>(EventHandler::compareOrder));
+        } else if (!annotation.isFullMatch() && !regexMessageHandlers.get(messageClazz).containsKey(annotation.regex())) {
+            regexMessageHandlers.get(messageClazz).put(annotation.regex(), new PriorityQueue<>(EventHandler::compareOrder));
+        }
+
+        //为了支持全匹配的正则表达式
+        if (!regexMessageHandlers.get(messageClazz).containsKey(Constants.ALL_REGEX)) {
+            regexMessageHandlers.get(messageClazz).put(Constants.ALL_REGEX, new PriorityQueue<>(EventHandler::compareOrder));
+        }
+
+
+        if (!annotation.isAllRegex()) {
+            if (annotation.isFullMatch()) {
+                fullMessageHandlers.get(messageClazz).get(annotation.regex()).add(new EventHandler(annotation, invoke));
+            } else {
+                regexMessageHandlers.get(messageClazz).get(annotation.regex()).add(new EventHandler(annotation, invoke));
+            }
+        } else {
+            regexMessageHandlers.get(messageClazz).get(Constants.ALL_REGEX).add(new EventHandler(annotation, invoke));
+
+        }
+
     }
 
     private void invokeMethod(Method method, Message message) {
@@ -78,17 +104,35 @@ public class HandlerResolver {
         }
     }
 
-    //TODO 问题：在多线程的条件下，如果访问较为频繁，线程无法及时改变messageBreaker的状态，可能会导致下次访问时，messageBreaker被改变，使循环中止
+
     public static void handleEvent(Message message) {
-        PriorityQueue<EventHandler> queue = handlers.getOrDefault(message.getClass(), null);
-        if (queue != null){
-            for(EventHandler handler: queue){
+        PriorityQueue<EventHandler> fullMatchQueue = fullMessageHandlers.get(message.getClass()).getOrDefault(message.getRaw_message(), null);
+        if (fullMatchQueue != null) {
+            for (EventHandler handler : fullMatchQueue) {
                 if (handler.annotation().concurrency()) {
-                    threadPoolTaskExecutor.execute(() -> {
-                        handler.accept(message);
-                    });
+                    threadPoolTaskExecutor.execute(() -> handler.accept(message));
                 } else {
                     handler.accept(message);
+                }
+                if (handler.annotation().shutdown()) {
+                    return;
+                }
+            }
+        }
+
+        Map<String, PriorityQueue<EventHandler>> regexMatchMap = regexMessageHandlers.get(message.getClass());
+        for (String regex : regexMatchMap.keySet()) {
+            if (message.getRaw_message().matches(regex)) {
+                PriorityQueue<EventHandler> regexMatchQueue = regexMatchMap.get(regex);
+                for (EventHandler handler : regexMatchQueue) {
+                    if (handler.annotation().concurrency()) {
+                        threadPoolTaskExecutor.execute(() -> handler.accept(message));
+                    } else {
+                        handler.accept(message);
+                    }
+                    if (handler.annotation().shutdown()) {
+                        return;
+                    }
                 }
             }
         }

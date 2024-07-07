@@ -2,7 +2,6 @@ package org.xzx.plugins;
 
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.xzx.annotation.RobotListener;
@@ -13,7 +12,6 @@ import org.xzx.bean.enums.CheckImageResponseCode;
 import org.xzx.bean.enums.DeleteImageResponseCode;
 import org.xzx.bean.enums.RestoreImageResponseCode;
 import org.xzx.bean.messageBean.ReceivedGroupMessage;
-import org.xzx.bean.messageUtil.MessageBreaker;
 import org.xzx.bean.messageUtil.MessageCounter;
 import org.xzx.bean.response.*;
 import org.xzx.service.ChatAIService;
@@ -59,11 +57,8 @@ public class GroupMessageListener {
     @Autowired
     private Map<Long, MessageCounter> messageCounterMap;
 
-    @Autowired
-    @Qualifier("messageBreaker")
-    private ThreadLocal<MessageBreaker> messageBreaker;
 
-    @RobotListenerHandler(order = -1)
+    @RobotListenerHandler(order = -1, isAllRegex = true)
     public void countMessage(ReceivedGroupMessage receivedGroupMessage) {
         long group_id = receivedGroupMessage.getGroup_id();
         MessageCounter messageCounter = messageCounterMap.get(group_id);
@@ -79,27 +74,25 @@ public class GroupMessageListener {
      *
      * @param receivedGroupMessage the received group message object
      */
-    @RobotListenerHandler(order = 1, shutdown = true)
+    @RobotListenerHandler(order = 1, shutdown = true, regex = "^\\[CQ:image,[^\\]]*\\]$")
     public void checkImage(ReceivedGroupMessage receivedGroupMessage) {
-        if (receivedGroupMessage.getRaw_message().startsWith("[CQ:image,")) {
-            List<String> cqStrings = CQ_String_Utils.getCQStrings(receivedGroupMessage.getRaw_message());
-            String imagecq = cqStrings.get(0);
-            String imageFileName = CQ_String_Utils.getImageFileName(imagecq);
-            ApiResponse<CheckImageResponse> checkImageResponseApiResponse = groupImageService.checkImageFileName(imageFileName);
-            if (checkImageResponseApiResponse.getCode() == ApiResultCode.FAILED.getCode() && CQ_String_Utils.getImageFileSize(imagecq) < imagesize) {
-                ImageCQ imageCQ = new ImageCQ();
-                imageCQ.setUrl(CQ_String_Utils.getImageURL(imagecq));
-                imageCQ.setGroup_id(receivedGroupMessage.getGroup_id());
-                imageCQ.setPoster(receivedGroupMessage.getUser_id());
-                imageCQ.setFile_name(imageFileName);
-                imageCQ.setFile_size(CQ_String_Utils.getImageFileSize(imagecq));
-                ApiResponse<CheckImageResponse> response = groupImageService.insertImage(imageCQ);
-                if (response.getCode() == ApiResultCode.SUCCESS.getCode() && response.getData().getCode() == CheckImageResponseCode.IMAGE_DOWNLOAD_SUCCESS.getCode()) {
-                    gocqService.send_group_message(receivedGroupMessage.getGroup_id(), "没见过，偷了");
-                } else {
-                    log.error(response.toString());
-                    gocqService.send_group_message(receivedGroupMessage.getGroup_id(), "没偷成");
-                }
+        List<String> cqStrings = CQ_String_Utils.getCQStrings(receivedGroupMessage.getRaw_message());
+        String imagecq = cqStrings.get(0);
+        String imageFileName = CQ_String_Utils.getImageFileName(imagecq);
+        ApiResponse<CheckImageResponse> checkImageResponseApiResponse = groupImageService.checkImageFileName(imageFileName);
+        if (checkImageResponseApiResponse.getCode() == ApiResultCode.FAILED.getCode() && CQ_String_Utils.getImageFileSize(imagecq) < imagesize) {
+            ImageCQ imageCQ = new ImageCQ();
+            imageCQ.setUrl(CQ_String_Utils.getImageURL(imagecq));
+            imageCQ.setGroup_id(receivedGroupMessage.getGroup_id());
+            imageCQ.setPoster(receivedGroupMessage.getUser_id());
+            imageCQ.setFile_name(imageFileName);
+            imageCQ.setFile_size(CQ_String_Utils.getImageFileSize(imagecq));
+            ApiResponse<CheckImageResponse> response = groupImageService.insertImage(imageCQ);
+            if (response.getCode() == ApiResultCode.SUCCESS.getCode() && response.getData().getCode() == CheckImageResponseCode.IMAGE_DOWNLOAD_SUCCESS.getCode()) {
+                gocqService.send_group_message(receivedGroupMessage.getGroup_id(), "没见过，偷了");
+            } else {
+                log.error(response.toString());
+                gocqService.send_group_message(receivedGroupMessage.getGroup_id(), "没偷成");
             }
         }
     }
@@ -107,7 +100,7 @@ public class GroupMessageListener {
     /**
      * @param receivedGroupMessage [CQ:reply,id=-635735050][CQ:at,qq=2351200988] [CQ:at,qq=2351200988] 123
      */
-    @RobotListenerHandler(order = 1, shutdown = true)
+    @RobotListenerHandler(order = 1, shutdown = true, regex = "^\\[CQ:reply,.*?图片$")
     public void imageReplyActions(ReceivedGroupMessage receivedGroupMessage) {
         long group_id = receivedGroupMessage.getGroup_id();
         long poster = receivedGroupMessage.getUser_id();
@@ -130,7 +123,7 @@ public class GroupMessageListener {
     }
 
 
-    @RobotListenerHandler(order = 1, concurrency = true, shutdown = true)
+    @RobotListenerHandler(order = 1, concurrency = true, isAllRegex = true)
     public void getRandomImage(ReceivedGroupMessage receivedGroupMessage) {
         log.info(receivedGroupMessage.getRaw_message());
         if (receivedGroupMessage.getRaw_message().equals(CQ_Generator_Utils.getAtString(qq)) || receivedGroupMessage.getRaw_message().equals(CQ_Generator_Utils.getAtString(qq) + " ")) {
@@ -138,9 +131,9 @@ public class GroupMessageListener {
         }
     }
 
-    @RobotListenerHandler(order = 2, concurrency = true)
+    @RobotListenerHandler(order = 2, concurrency = true, isAllRegex = true)
     public void getAIResponse(ReceivedGroupMessage receivedGroupMessage) {
-        if (receivedGroupMessage.getRaw_message().startsWith(CQ_Generator_Utils.getAtString(qq)) && !CQ_Generator_Utils.getAtString(qq).equals(receivedGroupMessage.getRaw_message())) {
+        if (receivedGroupMessage.getRaw_message().startsWith(CQ_Generator_Utils.getAtString(qq)) && !CQ_Generator_Utils.getAtString(qq).equals(receivedGroupMessage.getRaw_message()) && !CQ_Generator_Utils.getAtString(qq).equals(receivedGroupMessage.getRaw_message() + " ")){
             String message = receivedGroupMessage.getRaw_message().replace(CQ_Generator_Utils.getAtString(qq), "");
             String response = chatAIService.getChatAIResponse(message);
             gocqService.send_group_message(receivedGroupMessage.getGroup_id(), response);
