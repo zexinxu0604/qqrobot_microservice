@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.xzx.bean.enums.GroupServiceEnum;
 import org.xzx.bean.qqGroupBean.GroupService;
 import org.xzx.configs.Constants;
 import org.xzx.service.Gocq_service;
@@ -33,7 +34,7 @@ public class ScheduleJx3Tasks {
         Boolean status = jx3Service.get_server_open_status();
         System.out.println(status);
         if (status ^ jx3ServerOpenStatus) {
-            List<GroupService> groupServiceList = groupServiceService.selectAllGroupServiceByServiceName(Constants.SERVER_OPEN_CONTINUS);
+            List<GroupService> groupServiceList = groupServiceService.selectAllGroupServiceByServiceName(GroupServiceEnum.SERVER_OPEN_CONTINUS.getServiceName());
             if(jx3ServerOpenStatus){
                 for (GroupService groupService : groupServiceList) {
                     gocqService.send_group_message(groupService.getGroup_id(), "破阵子，关服啦，侠士快他妈睡觉吧");

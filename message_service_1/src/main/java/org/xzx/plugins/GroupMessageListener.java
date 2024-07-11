@@ -6,21 +6,21 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.xzx.annotation.RobotListener;
 import org.xzx.annotation.RobotListenerHandler;
+import org.xzx.bean.Domain.OffWorkRecord;
 import org.xzx.bean.ImageBean.ImageCQ;
-import org.xzx.bean.enums.ApiResultCode;
-import org.xzx.bean.enums.CheckImageResponseCode;
-import org.xzx.bean.enums.DeleteImageResponseCode;
-import org.xzx.bean.enums.RestoreImageResponseCode;
+import org.xzx.bean.enums.*;
 import org.xzx.bean.messageBean.ReceivedGroupMessage;
 import org.xzx.bean.messageUtil.MessageCounter;
 import org.xzx.bean.qqGroupBean.GroupService;
 import org.xzx.bean.response.*;
-import org.xzx.configs.Constants;
 import org.xzx.service.*;
 import org.xzx.utils.AliyunOSSUtils;
 import org.xzx.utils.CQ_Generator_Utils;
 import org.xzx.utils.CQ_String_Utils;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -59,6 +59,9 @@ public class GroupMessageListener {
     @Autowired
     private Map<Long, MessageCounter> messageCounterMap;
 
+    @Autowired
+    private OffWorkRecordService offWorkRecordService;
+
 
     @RobotListenerHandler(order = -1, isAllRegex = true)
     public void countMessage(ReceivedGroupMessage receivedGroupMessage) {
@@ -78,6 +81,9 @@ public class GroupMessageListener {
      */
     @RobotListenerHandler(order = 1, shutdown = true, regex = "^\\[CQ:image,[^\\]]*\\]$")
     public void checkImage(ReceivedGroupMessage receivedGroupMessage) {
+        if(!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.RANDOM_PICTURE)){
+            return;
+        }
         List<String> cqStrings = CQ_String_Utils.getCQStrings(receivedGroupMessage.getRaw_message());
         String imagecq = cqStrings.get(0);
         String imageFileName = CQ_String_Utils.getImageFileName(imagecq);
@@ -129,12 +135,7 @@ public class GroupMessageListener {
     public void getRandomImage(ReceivedGroupMessage receivedGroupMessage) {
         log.info(receivedGroupMessage.getRaw_message());
         if (receivedGroupMessage.getRaw_message().equals(CQ_Generator_Utils.getAtString(qq)) || receivedGroupMessage.getRaw_message().equals(CQ_Generator_Utils.getAtString(qq) + " ")) {
-            GroupService groupService = groupServiceService.selectGroupServiceByGroupIdAndServiceName(receivedGroupMessage.getGroup_id(), Constants.RANDOM_PICTURE);
-            if (groupService == null) {
-                groupServiceService.insertGroupService(receivedGroupMessage.getGroup_id(), Constants.RANDOM_PICTURE);
-            }
-            if (groupService != null && groupService.getStatus() == 0) {
-                gocqService.send_group_message(receivedGroupMessage.getGroup_id(), CQ_String_Utils.getGroupServiceCloseMessage(Constants.RANDOM_PICTURE));
+            if(!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.AT_RANDOM_PICTURE)){
                 return;
             }
             getRandomImage(receivedGroupMessage.getGroup_id());
@@ -144,18 +145,49 @@ public class GroupMessageListener {
     @RobotListenerHandler(order = 2, concurrency = true, isAllRegex = true)
     public void getAIResponse(ReceivedGroupMessage receivedGroupMessage) {
         if (receivedGroupMessage.getRaw_message().startsWith(CQ_Generator_Utils.getAtString(qq)) && !CQ_Generator_Utils.getAtString(qq).equals(receivedGroupMessage.getRaw_message()) && !CQ_Generator_Utils.getAtString(qq).equals(receivedGroupMessage.getRaw_message() + " ")){
-            GroupService groupService = groupServiceService.selectGroupServiceByGroupIdAndServiceName(receivedGroupMessage.getGroup_id(), Constants.GPT_CHAT);
-            if (groupService == null) {
-                groupServiceService.insertGroupService(receivedGroupMessage.getGroup_id(), Constants.GPT_CHAT);
-            }
-            if (groupService != null && groupService.getStatus() == 0) {
-                gocqService.send_group_message(receivedGroupMessage.getGroup_id(), CQ_String_Utils.getGroupServiceCloseMessage(Constants.RANDOM_PICTURE));
+            if(!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.GPT_CHAT)){
                 return;
             }
             String message = receivedGroupMessage.getRaw_message().replace(CQ_Generator_Utils.getAtString(qq), "");
             String response = chatAIService.getChatAIResponse(message);
             gocqService.send_group_message(receivedGroupMessage.getGroup_id(), response);
         }
+    }
+
+    @RobotListenerHandler(order = 0, concurrency = true, regex = "^下班$|^下班.$")
+    public void offWorkRecord(ReceivedGroupMessage receivedGroupMessage) {
+        if(!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.OFF_WORK_RECORD)){
+            return;
+        }
+        LocalDate localDate = LocalDate.now();
+        OffWorkRecord offWorkRecord;
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        offWorkRecord = offWorkRecordService.selectOffWorkRecordByGroupIdAndMemberIdAndOffworkDay(receivedGroupMessage.getGroup_id(), receivedGroupMessage.getUser_id(), localDate);
+        if (offWorkRecord == null) {
+            Date date = new Date();
+            offWorkRecord = new OffWorkRecord(receivedGroupMessage.getGroup_id(), receivedGroupMessage.getUser_id(), localDate, date);
+            if(offWorkRecordService.insertOffWorkRecord(offWorkRecord)){
+                gocqService.send_group_message(receivedGroupMessage.getGroup_id(), "打卡成功！打卡时间为：" + sdf.format(offWorkRecord.getOffwork_time()));
+            } else {
+                gocqService.send_group_message(receivedGroupMessage.getGroup_id(), "打卡失败！");
+            }
+        } else {
+            offWorkRecord.setOffwork_time(new Date());
+            if(offWorkRecordService.updateOffWorkRecordByGroupIdAndMemberIdAndOffworkDay(receivedGroupMessage.getGroup_id(), receivedGroupMessage.getUser_id(), localDate, offWorkRecord.getOffwork_time())){
+                gocqService.send_group_message(receivedGroupMessage.getGroup_id(), "打卡成功！打卡时间为：" + sdf.format(offWorkRecord.getOffwork_time()));
+            } else {
+                gocqService.send_group_message(receivedGroupMessage.getGroup_id(), "打卡失败！");
+            }
+        }
+    }
+
+    @RobotListenerHandler(order = 0, regex = "^(功能|功能列表)$")
+    public void getGroupServiceList(ReceivedGroupMessage receivedGroupMessage) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (GroupServiceEnum groupServiceEnum : GroupServiceEnum.values()) {
+            stringBuilder.append(groupServiceEnum.getServiceDesc()).append("：").append(groupServiceEnum.getServiceTrigger()).append("\n");
+        }
+        gocqService.send_group_message(receivedGroupMessage.getGroup_id(), stringBuilder.toString());
     }
 
 

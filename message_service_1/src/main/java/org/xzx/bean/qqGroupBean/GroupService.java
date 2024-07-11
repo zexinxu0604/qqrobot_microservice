@@ -9,13 +9,14 @@ import lombok.Data;
 
 @Data
 @TableName("group_service")
+@AllArgsConstructor
 public class GroupService {
 
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
     @TableField("group_id")
-    private long group_id;
+    private Long group_id;
 
     @TableField("service_name")
     private String service_name;

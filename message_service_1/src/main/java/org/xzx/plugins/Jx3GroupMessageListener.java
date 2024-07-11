@@ -7,10 +7,10 @@ import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.xzx.annotation.RobotListener;
 import org.xzx.annotation.RobotListenerHandler;
 import org.xzx.bean.Jx3.Jx3Response.Jx3PictureUrlResponse;
+import org.xzx.bean.enums.GroupServiceEnum;
 import org.xzx.bean.messageBean.ReceivedGroupMessage;
 import org.xzx.bean.messageUtil.MessageCounter;
 import org.xzx.bean.qqGroupBean.GroupService;
-import org.xzx.configs.Constants;
 import org.xzx.service.Gocq_service;
 import org.xzx.service.GroupImageService;
 import org.xzx.service.GroupServiceService;
@@ -50,12 +50,7 @@ public class Jx3GroupMessageListener {
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "^属性 .*$")
     public void getJx3RoleDetatilPicture(ReceivedGroupMessage receivedGroupMessage) {
-        GroupService groupService = groupServiceService.selectGroupServiceByGroupIdAndServiceName(receivedGroupMessage.getGroup_id(), Constants.JX3_ATTRIBUTE);
-        if (groupService == null) {
-            groupServiceService.insertGroupService(receivedGroupMessage.getGroup_id(), Constants.JX3_ATTRIBUTE);
-        }
-        if (groupService != null && groupService.getStatus() == 0) {
-            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), CQ_String_Utils.getGroupServiceCloseMessage(Constants.JX3_ATTRIBUTE));
+        if(!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_ATTRIBUTE)){
             return;
         }
         long group_id = receivedGroupMessage.getGroup_id();
@@ -75,12 +70,7 @@ public class Jx3GroupMessageListener {
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "^烟花 .*$")
     public void getJx3RoleFireworkPicture(ReceivedGroupMessage receivedGroupMessage) {
-        GroupService groupService = groupServiceService.selectGroupServiceByGroupIdAndServiceName(receivedGroupMessage.getGroup_id(), Constants.JX3_FIREWORK);
-        if (groupService == null) {
-            groupServiceService.insertGroupService(receivedGroupMessage.getGroup_id(), Constants.JX3_FIREWORK);
-        }
-        if (groupService != null && groupService.getStatus() == 0) {
-            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), CQ_String_Utils.getGroupServiceCloseMessage(Constants.JX3_FIREWORK));
+        if(!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_FIREWORK)){
             return;
         }
         long group_id = receivedGroupMessage.getGroup_id();
@@ -97,12 +87,7 @@ public class Jx3GroupMessageListener {
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "^查询 .*$")
     public void getJx3RoleLuckPicture(ReceivedGroupMessage receivedGroupMessage) {
-        GroupService groupService = groupServiceService.selectGroupServiceByGroupIdAndServiceName(receivedGroupMessage.getGroup_id(), Constants.JX3_LUCK);
-        if (groupService == null) {
-            groupServiceService.insertGroupService(receivedGroupMessage.getGroup_id(), Constants.JX3_LUCK);
-        }
-        if (groupService != null && groupService.getStatus() == 0) {
-            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), CQ_String_Utils.getGroupServiceCloseMessage(Constants.JX3_LUCK));
+        if(!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_LUCK)){
             return;
         }
         long group_id = receivedGroupMessage.getGroup_id();
@@ -119,12 +104,7 @@ public class Jx3GroupMessageListener {
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "^招募 .*$")
     public void getJx3TeamRecruitPicture(ReceivedGroupMessage receivedGroupMessage) {
-        GroupService groupService = groupServiceService.selectGroupServiceByGroupIdAndServiceName(receivedGroupMessage.getGroup_id(), Constants.JX3_TEAM_RECRUIT);
-        if (groupService == null) {
-            groupServiceService.insertGroupService(receivedGroupMessage.getGroup_id(), Constants.JX3_TEAM_RECRUIT);
-        }
-        if (groupService != null && groupService.getStatus() == 0) {
-            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), CQ_String_Utils.getGroupServiceCloseMessage(Constants.JX3_TEAM_RECRUIT));
+        if(!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_TEAM_RECRUIT)){
             return;
         }
         long group_id = receivedGroupMessage.getGroup_id();
@@ -142,12 +122,7 @@ public class Jx3GroupMessageListener {
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "百战", isFullMatch = true)
     public void getJx3BaizhanBossPicture(ReceivedGroupMessage receivedGroupMessage) {
-        GroupService groupService = groupServiceService.selectGroupServiceByGroupIdAndServiceName(receivedGroupMessage.getGroup_id(), Constants.JX3_BaiZhan);
-        if (groupService == null) {
-            groupServiceService.insertGroupService(receivedGroupMessage.getGroup_id(), Constants.JX3_BaiZhan);
-        }
-        if (groupService != null && groupService.getStatus() == 0) {
-            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), CQ_String_Utils.getGroupServiceCloseMessage(Constants.JX3_BaiZhan));
+        if(!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_BaiZhan)){
             return;
         }
         long group_id = receivedGroupMessage.getGroup_id();
@@ -157,12 +132,7 @@ public class Jx3GroupMessageListener {
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "^掉落 .*$")
     public void getJx3BossTreasurePicture(ReceivedGroupMessage receivedGroupMessage) {
-        GroupService groupService = groupServiceService.selectGroupServiceByGroupIdAndServiceName(receivedGroupMessage.getGroup_id(), Constants.JX3_BOSS_TREASURE);
-        if (groupService == null) {
-            groupServiceService.insertGroupService(receivedGroupMessage.getGroup_id(), Constants.JX3_BOSS_TREASURE);
-        }
-        if (groupService != null && groupService.getStatus() == 0) {
-            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), CQ_String_Utils.getGroupServiceCloseMessage(Constants.JX3_BOSS_TREASURE));
+        if(!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_BOSS_TREASURE)){
             return;
         }
         long group_id = receivedGroupMessage.getGroup_id();
@@ -178,14 +148,9 @@ public class Jx3GroupMessageListener {
         catchJx3PictureResponseAndReturn(group_id, jx3PictureUrlResponse);
     }
 
-    @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "^价格 .*$")
+    @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "^物价 .*$")
     public void getJx3BlackTradePicture(ReceivedGroupMessage receivedGroupMessage) {
-        GroupService groupService = groupServiceService.selectGroupServiceByGroupIdAndServiceName(receivedGroupMessage.getGroup_id(), Constants.JX3_BLACK_TRADE);
-        if (groupService == null) {
-            groupServiceService.insertGroupService(receivedGroupMessage.getGroup_id(), Constants.JX3_BLACK_TRADE);
-        }
-        if (groupService != null && groupService.getStatus() == 0) {
-            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), CQ_String_Utils.getGroupServiceCloseMessage(Constants.JX3_BLACK_TRADE));
+        if(!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_BLACK_TRADE)){
             return;
         }
         long group_id = receivedGroupMessage.getGroup_id();
@@ -198,12 +163,7 @@ public class Jx3GroupMessageListener {
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "^日常.*$")
     public void getJx3DailyPicture(ReceivedGroupMessage receivedGroupMessage) {
-        GroupService groupService = groupServiceService.selectGroupServiceByGroupIdAndServiceName(receivedGroupMessage.getGroup_id(), Constants.JX3_DAILY);
-        if (groupService == null) {
-            groupServiceService.insertGroupService(receivedGroupMessage.getGroup_id(), Constants.JX3_DAILY);
-        }
-        if (groupService != null && groupService.getStatus() == 0) {
-            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), CQ_String_Utils.getGroupServiceCloseMessage(Constants.JX3_DAILY));
+        if(!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_DAILY)){
             return;
         }
         String raw_message = receivedGroupMessage.getRaw_message();
@@ -227,12 +187,7 @@ public class Jx3GroupMessageListener {
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "^金价.*$")
     public void getJx3GoldPrice(ReceivedGroupMessage receivedGroupMessage) {
-        GroupService groupService = groupServiceService.selectGroupServiceByGroupIdAndServiceName(receivedGroupMessage.getGroup_id(), Constants.JX3_GOLD_PRICE);
-        if (groupService == null) {
-            groupServiceService.insertGroupService(receivedGroupMessage.getGroup_id(), Constants.JX3_GOLD_PRICE);
-        }
-        if (groupService != null && groupService.getStatus() == 0) {
-            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), CQ_String_Utils.getGroupServiceCloseMessage(Constants.JX3_GOLD_PRICE));
+        if(!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_GOLD_PRICE)){
             return;
         }
         String raw_message = receivedGroupMessage.getRaw_message();
@@ -256,12 +211,7 @@ public class Jx3GroupMessageListener {
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "^开服.*$")
     public void getServerStatus(ReceivedGroupMessage receivedGroupMessage) {
-        GroupService groupService = groupServiceService.selectGroupServiceByGroupIdAndServiceName(receivedGroupMessage.getGroup_id(), Constants.SERVER_OPEN);
-        if (groupService == null) {
-            groupServiceService.insertGroupService(receivedGroupMessage.getGroup_id(), Constants.SERVER_OPEN);
-        }
-        if (groupService != null && groupService.getStatus() == 0) {
-            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), CQ_String_Utils.getGroupServiceCloseMessage(Constants.SERVER_OPEN));
+        if(!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.SERVER_OPEN)){
             return;
         }
         if (receivedGroupMessage.getRaw_message().equals("开服")) {

@@ -30,9 +30,9 @@ public class GroupServiceConfig {
 //        List<Long> groupList = getGroupList();
 //        Map<Long, Map<String, Boolean>> groupServiceMap = new HashMap<>();
 //        for (Long group_id : groupList) {
-//            List<GroupService> groupServiceList = groupServiceService.selectAllGroupServiceByGroupId(group_id);
+//            List<GroupServiceEnum> groupServiceList = groupServiceService.selectAllGroupServiceByGroupId(group_id);
 //            Map<String, Boolean> serviceMap = new HashMap<>();
-//            for (GroupService groupService : groupServiceList) {
+//            for (GroupServiceEnum groupService : groupServiceList) {
 //                serviceMap.put(groupService.getService_name(), groupService.getStatus() == 1);
 //            }
 //            groupServiceMap.put(group_id, serviceMap);
