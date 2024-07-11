@@ -152,7 +152,7 @@ public class Jx3_service {
 
     public Jx3PictureUrlResponse get_daily_picture(String server) {
         Jx3DailyPictureRequest jx3DailyPictureRequest = new Jx3DailyPictureRequest(server);
-        Jx3PictureUrlResponse jx3PictureUrlResponse = springRestService.postWithObject(jx3_url + "view/active/current", jx3DailyPictureRequest, Jx3PictureUrlResponse.class);
+        Jx3PictureUrlResponse jx3PictureUrlResponse = springRestService.postWithObject(jx3_url + "view/active/calendar", headers_with_token_v1, jx3DailyPictureRequest, Jx3PictureUrlResponse.class);
         try {
             return jx3PictureUrlResponse;
         } catch (NullPointerException e) {

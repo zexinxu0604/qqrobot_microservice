@@ -1,13 +1,26 @@
 package org.xzx.bean.qqGroupBean;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@TableName("group_service")
 public class GroupService {
-    private long id;
+
+    @TableId(value = "id", type = IdType.AUTO)
+    private Integer id;
+
+    @TableField("group_id")
     private long group_id;
+
+    @TableField("service_name")
     private String service_name;
+
+    @TableField("status")
     private int status = 1;
 
     public GroupService(long group_id, String service_name) {

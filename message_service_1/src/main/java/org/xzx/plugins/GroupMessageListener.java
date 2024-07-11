@@ -13,11 +13,10 @@ import org.xzx.bean.enums.DeleteImageResponseCode;
 import org.xzx.bean.enums.RestoreImageResponseCode;
 import org.xzx.bean.messageBean.ReceivedGroupMessage;
 import org.xzx.bean.messageUtil.MessageCounter;
+import org.xzx.bean.qqGroupBean.GroupService;
 import org.xzx.bean.response.*;
-import org.xzx.service.ChatAIService;
-import org.xzx.service.Gocq_service;
-import org.xzx.service.GroupImageService;
-import org.xzx.service.Jx3_service;
+import org.xzx.configs.Constants;
+import org.xzx.service.*;
 import org.xzx.utils.AliyunOSSUtils;
 import org.xzx.utils.CQ_Generator_Utils;
 import org.xzx.utils.CQ_String_Utils;
@@ -41,6 +40,9 @@ public class GroupMessageListener {
 
     @Autowired
     private Jx3_service jx3Service;
+
+    @Autowired
+    private GroupServiceService groupServiceService;
 
     @Value("${qq.number}")
     private long qq;
@@ -127,6 +129,14 @@ public class GroupMessageListener {
     public void getRandomImage(ReceivedGroupMessage receivedGroupMessage) {
         log.info(receivedGroupMessage.getRaw_message());
         if (receivedGroupMessage.getRaw_message().equals(CQ_Generator_Utils.getAtString(qq)) || receivedGroupMessage.getRaw_message().equals(CQ_Generator_Utils.getAtString(qq) + " ")) {
+            GroupService groupService = groupServiceService.selectGroupServiceByGroupIdAndServiceName(receivedGroupMessage.getGroup_id(), Constants.RANDOM_PICTURE);
+            if (groupService == null) {
+                groupServiceService.insertGroupService(receivedGroupMessage.getGroup_id(), Constants.RANDOM_PICTURE);
+            }
+            if (groupService != null && groupService.getStatus() == 0) {
+                gocqService.send_group_message(receivedGroupMessage.getGroup_id(), CQ_String_Utils.getGroupServiceCloseMessage(Constants.RANDOM_PICTURE));
+                return;
+            }
             getRandomImage(receivedGroupMessage.getGroup_id());
         }
     }
@@ -134,6 +144,14 @@ public class GroupMessageListener {
     @RobotListenerHandler(order = 2, concurrency = true, isAllRegex = true)
     public void getAIResponse(ReceivedGroupMessage receivedGroupMessage) {
         if (receivedGroupMessage.getRaw_message().startsWith(CQ_Generator_Utils.getAtString(qq)) && !CQ_Generator_Utils.getAtString(qq).equals(receivedGroupMessage.getRaw_message()) && !CQ_Generator_Utils.getAtString(qq).equals(receivedGroupMessage.getRaw_message() + " ")){
+            GroupService groupService = groupServiceService.selectGroupServiceByGroupIdAndServiceName(receivedGroupMessage.getGroup_id(), Constants.GPT_CHAT);
+            if (groupService == null) {
+                groupServiceService.insertGroupService(receivedGroupMessage.getGroup_id(), Constants.GPT_CHAT);
+            }
+            if (groupService != null && groupService.getStatus() == 0) {
+                gocqService.send_group_message(receivedGroupMessage.getGroup_id(), CQ_String_Utils.getGroupServiceCloseMessage(Constants.RANDOM_PICTURE));
+                return;
+            }
             String message = receivedGroupMessage.getRaw_message().replace(CQ_Generator_Utils.getAtString(qq), "");
             String response = chatAIService.getChatAIResponse(message);
             gocqService.send_group_message(receivedGroupMessage.getGroup_id(), response);

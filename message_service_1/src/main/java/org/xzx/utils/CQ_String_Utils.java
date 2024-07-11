@@ -111,4 +111,8 @@ public class CQ_String_Utils {
         return Integer.parseInt(str.substring(str.indexOf("file_size=") + 10, str.indexOf("]")));
     }
 
+    public static String getGroupServiceCloseMessage(String ServiceName){
+        return "已关闭"+ServiceName+"服务";
+    }
+
 }
