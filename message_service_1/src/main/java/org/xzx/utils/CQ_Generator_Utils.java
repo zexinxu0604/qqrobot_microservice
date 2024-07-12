@@ -6,15 +6,15 @@ public class CQ_Generator_Utils {
         return "[CQ:at,qq=" + id + "]";
     }
 
-    public static String getFaceString(int id) {
+    public static String getFaceString(long id) {
         return "[CQ:face,id=" + id + "]";
     }
 
-    public static String getEmojiString(int id) {
+    public static String getEmojiString(long id) {
         return "[CQ:emoji,id=" + id + "]";
     }
 
-    public static String getPokeString(int id) {
+    public static String getPokeString(long id) {
         return "[CQ:poke,id=" + id + "]";
     }
 

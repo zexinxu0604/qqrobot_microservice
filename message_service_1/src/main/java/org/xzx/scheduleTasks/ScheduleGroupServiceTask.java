@@ -3,6 +3,7 @@ package org.xzx.scheduleTasks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.xzx.bean.Domain.OffWorkRecord;
 import org.xzx.bean.enums.GroupServiceEnum;
 import org.xzx.service.Gocq_service;
@@ -59,5 +60,14 @@ public class ScheduleGroupServiceTask {
 
         }
     }
+
+    @Scheduled(cron = "0 0 17 ? * 2-6")
+    public void remindOffWork() {
+        List<Long> groupList = groupServiceService.selectAllGroupByServiceName(GroupServiceEnum.OFF_WORK_RECORD.getServiceName());
+        for (Long group_id : groupList) {
+            gocqService.send_group_message(group_id, "下班的记得在群里说一声喔！发送下班即可记录下班时间！");
+        }
+    }
+
 
 }

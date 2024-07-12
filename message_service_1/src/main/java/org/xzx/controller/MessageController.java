@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +14,7 @@ import org.xzx.bean.messageBean.ReceivedGroupMessage;
 import org.xzx.bean.messageBean.ReceivedPrivateMessage;
 
 @Controller
+@Slf4j
 public class MessageController {
 
     @RequestMapping("/message")
@@ -39,7 +41,7 @@ public class MessageController {
     @ResponseBody
     public void handler_group_message(HttpServletRequest request) {
         ReceivedGroupMessage groupMessage = (ReceivedGroupMessage) request.getAttribute("message");
-        System.out.println(groupMessage.getRaw_message());
+        log.info("groupMessage: From" + groupMessage.getGroup_id() + " content:" + groupMessage.getRaw_message());
         HandlerResolver.handleEvent(groupMessage);
     }
 

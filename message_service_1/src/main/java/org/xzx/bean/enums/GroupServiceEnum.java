@@ -19,6 +19,8 @@ public enum GroupServiceEnum {
     /**
      * 其他服务
      */
+    OPEN_SERVICE("open_service", "开启服务", "开启 服务名"),
+    CLOSE_SERVICE("close_service", "关闭服务", "关闭 服务名"),
     GPT_CHAT("gpt_chat", "GPT聊天", "@机器人 聊天内容"),
 
     RANDOM_PICTURE("random_picture", "机器人表情包水群", "无触发语句，自动触发"),

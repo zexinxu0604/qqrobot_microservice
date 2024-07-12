@@ -148,6 +148,7 @@ public class GroupMessageListener {
             if(!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.GPT_CHAT)){
                 return;
             }
+            log.info("AI功能触发:" + "群号：" + receivedGroupMessage.getGroup_id() + "用户：" + receivedGroupMessage.getUser_id() + "消息：" + receivedGroupMessage.getRaw_message());
             String message = receivedGroupMessage.getRaw_message().replace(CQ_Generator_Utils.getAtString(qq), "");
             String response = chatAIService.getChatAIResponse(message);
             gocqService.send_group_message(receivedGroupMessage.getGroup_id(), response);
@@ -159,9 +160,10 @@ public class GroupMessageListener {
         if(!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.OFF_WORK_RECORD)){
             return;
         }
+        log.info("下班功能触发:" + "群号：" + receivedGroupMessage.getGroup_id() + "用户：" + receivedGroupMessage.getUser_id() + "消息：" + receivedGroupMessage.getRaw_message());
         LocalDate localDate = LocalDate.now();
         OffWorkRecord offWorkRecord;
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         offWorkRecord = offWorkRecordService.selectOffWorkRecordByGroupIdAndMemberIdAndOffworkDay(receivedGroupMessage.getGroup_id(), receivedGroupMessage.getUser_id(), localDate);
         if (offWorkRecord == null) {
             Date date = new Date();
@@ -188,6 +190,38 @@ public class GroupMessageListener {
             stringBuilder.append(groupServiceEnum.getServiceDesc()).append("：").append(groupServiceEnum.getServiceTrigger()).append("\n");
         }
         gocqService.send_group_message(receivedGroupMessage.getGroup_id(), stringBuilder.toString());
+    }
+
+    @RobotListenerHandler(order = 0, regex = "^开启 .*$")
+    public void openService(ReceivedGroupMessage receivedGroupMessage) {
+        String message = receivedGroupMessage.getRaw_message();
+        String serviceName = message.substring(3);
+        GroupServiceEnum groupServiceEnum = GroupServiceEnum.getGroupServiceEnumByServiceDesc(serviceName);
+        if (groupServiceEnum == null) {
+            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), String.format("找不到%s对应服务", serviceName));
+            return;
+        }
+        if (groupServiceService.openGroupService(receivedGroupMessage.getGroup_id(), groupServiceEnum.getServiceName())) {
+            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), String.format("开启 %s 功能成功", serviceName));
+        } else {
+            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), String.format("开启 %s 功能失败, 若未使用过该功能请使用一次", serviceName));
+        }
+    }
+
+    @RobotListenerHandler(order = 0, regex = "^关闭 .*$")
+    public void closeService(ReceivedGroupMessage receivedGroupMessage) {
+        String message = receivedGroupMessage.getRaw_message();
+        String serviceName = message.substring(3);
+        GroupServiceEnum groupServiceEnum = GroupServiceEnum.getGroupServiceEnumByServiceDesc(serviceName);
+        if (groupServiceEnum == null) {
+            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), String.format("找不到%s对应服务", serviceName));
+            return;
+        }
+        if (groupServiceService.closeGroupService(receivedGroupMessage.getGroup_id(), groupServiceEnum.getServiceName())) {
+            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), String.format("关闭 %s 功能成功", serviceName));
+        } else {
+            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), String.format("关闭 %s 功能失败, 若未使用过该功能请使用一次", serviceName));
+        }
     }
 
 
