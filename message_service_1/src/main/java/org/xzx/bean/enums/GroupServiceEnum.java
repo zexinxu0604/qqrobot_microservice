@@ -16,6 +16,12 @@ public enum GroupServiceEnum {
     JX3_ATTRIBUTE("jx3_attribute", "角色属性", "属性 角色名或属性 服务器名 角色名"),
     JX3_TEAM_RECRUIT("jx3_team_recruit", "剑网三招募", "招募 招募内容"),
 
+    TIEBA_ITEM("tieba_item", "贴吧物品查询", "贴吧 物品名或贴吧 服务器名 物品名"),
+
+    TIEBA_CHIGUA("tieba_bagua", "贴吧八卦", "吃瓜 类型 （可选范围：818 616 鬼网三 鬼网3 树洞 记录 教程 街拍 故事 避雷 吐槽 提问）"),
+
+    AVATAR_CHIGUA("avatar_bagua", "阿瓦达啃大瓜", "阿瓦达啃大瓜 贴子链接"),
+
     /**
      * 其他服务
      */

@@ -1,6 +1,7 @@
 package org.xzx.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,8 +9,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.stereotype.Service;
 import org.springframework.http.HttpHeaders;
+import org.xzx.bean.Jx3.DTO.Jx3AvatarChiguaRequest;
+import org.xzx.bean.Jx3.DTO.Jx3TiebaGuaRequest;
 import org.xzx.bean.Jx3.Jx3Response.Jx3PictureUrlResponse;
+import org.xzx.bean.Jx3.Jx3Response.Jx3TiebaGuaResponse;
+import org.xzx.bean.Jx3.Jx3Response.Jx3TiebaItemResponse;
+import org.xzx.bean.Jx3.DTO.Jx3TiebaItemRequest;
 import org.xzx.bean.Jx3.jx3pictureRequestBean.*;
+
+import java.io.IOException;
+import java.util.List;
 
 
 @Service
@@ -196,5 +205,47 @@ public class Jx3_service {
     public Boolean get_server_open_status() {
         return get_server_open_status("破阵子");
     }
+
+    public List<Jx3TiebaItemResponse> get_tieba_item_url(String server, String item) throws IOException {
+        JsonNode jsonNode = springRestService.postWithObject(jx3_url + "data/tieba/item/records", headers_with_token_v1 ,new Jx3TiebaItemRequest(server, item, 1), JsonNode.class);
+        System.out.println(jsonNode.toString());
+        if (jsonNode.get("code").asInt() != 200) {
+            return null;
+        }
+        ObjectMapper mapper = new ObjectMapper();
+        System.out.println(jsonNode.get("data").asText());
+        return mapper.readerForListOf(Jx3TiebaItemResponse.class).readValue(jsonNode.get("data"));
+    }
+
+    public List<Jx3TiebaItemResponse> get_tieba_item_url(String item) throws IOException {
+        return get_tieba_item_url("破阵子", item);
+    }
+
+    public List<Jx3TiebaGuaResponse> get_tieba_gua_url(String type) throws IOException {
+        JsonNode jsonNode = springRestService.postWithObject(jx3_url + "data/tieba/random", headers_with_token_v1, new Jx3TiebaGuaRequest(type, "-",1), JsonNode.class);
+        if (jsonNode.get("code").asInt() != 200) {
+            return null;
+        }
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readerForListOf(Jx3TiebaGuaResponse.class).readValue(jsonNode.get("data"));
+    }
+
+    public List<Jx3TiebaGuaResponse> get_tieba_gua_url() throws IOException {
+        return get_tieba_gua_url("818");
+    }
+
+    public String get_Avatar_chigua(String url) {
+        String avater_url = "https://gossip.jx3tool.com/api/gossip_summary";
+        String url_id = url.substring(url.lastIndexOf("/") + 1);
+        log.info("啃大瓜url_id: " + url_id);
+        Jx3AvatarChiguaRequest jx3AvatarChiguaRequest = new Jx3AvatarChiguaRequest(url_id, true, 0, 1, 1);
+        JsonNode jsonNode = springRestService.postWithObject(avater_url, jx3AvatarChiguaRequest, JsonNode.class);
+        if (jsonNode.get("code").asInt() != 200) {
+            return null;
+        }
+        return jsonNode.get("msg").asText();
+    }
+
+
 
 }

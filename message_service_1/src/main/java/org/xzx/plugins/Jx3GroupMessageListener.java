@@ -4,22 +4,28 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
+import org.xzx.Templates.TiebaGuaTemplate;
 import org.xzx.annotation.RobotListener;
 import org.xzx.annotation.RobotListenerHandler;
 import org.xzx.bean.Jx3.Jx3Response.Jx3PictureUrlResponse;
+import org.xzx.bean.Jx3.Jx3Response.Jx3TiebaGuaResponse;
+import org.xzx.bean.Jx3.Jx3Response.Jx3TiebaItemResponse;
 import org.xzx.bean.enums.GroupServiceEnum;
 import org.xzx.bean.messageBean.ReceivedGroupMessage;
 import org.xzx.bean.messageUtil.MessageCounter;
-import org.xzx.bean.qqGroupBean.GroupService;
 import org.xzx.service.Gocq_service;
 import org.xzx.service.GroupImageService;
 import org.xzx.service.GroupServiceService;
 import org.xzx.service.Jx3_service;
 import org.xzx.utils.AliyunOSSUtils;
 import org.xzx.utils.CQ_Generator_Utils;
-import org.xzx.utils.CQ_String_Utils;
+import org.xzx.Templates.TiebaItemTemplate;
+import org.xzx.Templates.interfaces.StringTemplate;
 
+import java.io.IOException;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @RobotListener
 @Log4j2
@@ -50,7 +56,7 @@ public class Jx3GroupMessageListener {
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "^属性 .*$")
     public void getJx3RoleDetatilPicture(ReceivedGroupMessage receivedGroupMessage) {
-        if(!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_ATTRIBUTE)){
+        if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_ATTRIBUTE)) {
             return;
         }
         long group_id = receivedGroupMessage.getGroup_id();
@@ -70,7 +76,7 @@ public class Jx3GroupMessageListener {
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "^烟花 .*$")
     public void getJx3RoleFireworkPicture(ReceivedGroupMessage receivedGroupMessage) {
-        if(!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_FIREWORK)){
+        if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_FIREWORK)) {
             return;
         }
         long group_id = receivedGroupMessage.getGroup_id();
@@ -87,7 +93,7 @@ public class Jx3GroupMessageListener {
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "^查询 .*$")
     public void getJx3RoleLuckPicture(ReceivedGroupMessage receivedGroupMessage) {
-        if(!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_LUCK)){
+        if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_LUCK)) {
             return;
         }
         long group_id = receivedGroupMessage.getGroup_id();
@@ -104,7 +110,7 @@ public class Jx3GroupMessageListener {
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "^招募 .*$")
     public void getJx3TeamRecruitPicture(ReceivedGroupMessage receivedGroupMessage) {
-        if(!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_TEAM_RECRUIT)){
+        if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_TEAM_RECRUIT)) {
             return;
         }
         long group_id = receivedGroupMessage.getGroup_id();
@@ -122,7 +128,7 @@ public class Jx3GroupMessageListener {
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "百战", isFullMatch = true)
     public void getJx3BaizhanBossPicture(ReceivedGroupMessage receivedGroupMessage) {
-        if(!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_BaiZhan)){
+        if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_BaiZhan)) {
             return;
         }
         long group_id = receivedGroupMessage.getGroup_id();
@@ -132,7 +138,7 @@ public class Jx3GroupMessageListener {
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "^掉落 .*$")
     public void getJx3BossTreasurePicture(ReceivedGroupMessage receivedGroupMessage) {
-        if(!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_BOSS_TREASURE)){
+        if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_BOSS_TREASURE)) {
             return;
         }
         long group_id = receivedGroupMessage.getGroup_id();
@@ -150,7 +156,7 @@ public class Jx3GroupMessageListener {
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "^物价 .*$")
     public void getJx3BlackTradePicture(ReceivedGroupMessage receivedGroupMessage) {
-        if(!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_BLACK_TRADE)){
+        if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_BLACK_TRADE)) {
             return;
         }
         long group_id = receivedGroupMessage.getGroup_id();
@@ -163,7 +169,7 @@ public class Jx3GroupMessageListener {
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "^日常.*$")
     public void getJx3DailyPicture(ReceivedGroupMessage receivedGroupMessage) {
-        if(!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_DAILY)){
+        if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_DAILY)) {
             return;
         }
         String raw_message = receivedGroupMessage.getRaw_message();
@@ -187,7 +193,7 @@ public class Jx3GroupMessageListener {
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "^金价.*$")
     public void getJx3GoldPrice(ReceivedGroupMessage receivedGroupMessage) {
-        if(!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_GOLD_PRICE)){
+        if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_GOLD_PRICE)) {
             return;
         }
         String raw_message = receivedGroupMessage.getRaw_message();
@@ -211,7 +217,7 @@ public class Jx3GroupMessageListener {
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "^开服.*$")
     public void getServerStatus(ReceivedGroupMessage receivedGroupMessage) {
-        if(!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.SERVER_OPEN)){
+        if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.SERVER_OPEN)) {
             return;
         }
         if (receivedGroupMessage.getRaw_message().equals("开服")) {
@@ -234,6 +240,98 @@ public class Jx3GroupMessageListener {
                 gocqService.send_group_message(group_id, parts[1] + ",未开服");
             }
         }
+    }
+
+    @RobotListenerHandler(order = 0, concurrency = true, regex = "^贴吧 .*$")
+    public void getTiebaItemUrl(ReceivedGroupMessage receivedGroupMessage) throws IOException {
+        if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.TIEBA_ITEM)) {
+            return;
+        }
+        log.info("贴吧物品查询: 群id: " + receivedGroupMessage.getGroup_id() + " 发送者: " + receivedGroupMessage.getSender().getUser_id() + " 消息: " + receivedGroupMessage.getRaw_message());
+        try {
+            long group_id = receivedGroupMessage.getGroup_id();
+            String raw_message = receivedGroupMessage.getRaw_message();
+            String[] parts = raw_message.split(" ");
+            if (parts.length == 2) {
+                List<Jx3TiebaItemResponse> jx3TiebaItemResponses = jx3Service.get_tieba_item_url(parts[1]);
+                if (responseFromTiebaItemResponse(group_id, jx3TiebaItemResponses)) return;
+            } else if (parts.length == 3) {
+                List<Jx3TiebaItemResponse> jx3TiebaItemResponses = jx3Service.get_tieba_item_url(parts[1], parts[2]);
+                if (responseFromTiebaItemResponse(group_id, jx3TiebaItemResponses)) return;
+            } else {
+                gocqService.send_group_message(group_id, "请检查格式是否为 贴吧 物品名");
+            }
+        } catch (Exception e) {
+            log.error("贴吧物品查询失败", e);
+            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), "查询失败");
+        }
+    }
+
+    @RobotListenerHandler(concurrency = true, regex = "^吃瓜.*$")
+    public void getTiebaChiGua(ReceivedGroupMessage receivedGroupMessage) throws IOException {
+        if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.TIEBA_CHIGUA)) {
+            return;
+        }
+        long group_id = receivedGroupMessage.getGroup_id();
+        String raw_message = receivedGroupMessage.getRaw_message();
+        try {
+            String[] parts = raw_message.split(" ");
+            if (parts.length == 2) {
+                List<Jx3TiebaGuaResponse> jx3TiebaGuaResponses = jx3Service.get_tieba_gua_url(parts[1]);
+                for (Jx3TiebaGuaResponse jx3TiebaGuaResponse : jx3TiebaGuaResponses) {
+                    StringTemplate tiebaGuaTemplate = new TiebaGuaTemplate();
+                    String response_content = tiebaGuaTemplate.getResultWithTemplate(jx3TiebaGuaResponse);
+                    gocqService.send_group_message(group_id, response_content);
+                }
+            } else {
+                List<Jx3TiebaGuaResponse> jx3TiebaGuaResponses = jx3Service.get_tieba_gua_url();
+                for (Jx3TiebaGuaResponse jx3TiebaGuaResponse : jx3TiebaGuaResponses) {
+                    StringTemplate tiebaGuaTemplate = new TiebaGuaTemplate();
+                    String response_content = tiebaGuaTemplate.getResultWithTemplate(jx3TiebaGuaResponse);
+                    gocqService.send_group_message(group_id, response_content);
+                }
+            }
+        } catch (Exception e) {
+            log.error("吃瓜查询失败", e);
+            gocqService.send_group_message(group_id, "查询吃瓜失败");
+        }
+    }
+
+    @RobotListenerHandler(concurrency = true, regex = "^阿瓦达啃大瓜 .*$")
+    public void getAvatarChiGua(ReceivedGroupMessage receivedGroupMessage) {
+        if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.AVATAR_CHIGUA)) {
+            return;
+        }
+        long group_id = receivedGroupMessage.getGroup_id();
+        String raw_message = receivedGroupMessage.getRaw_message();
+        try {
+            String[] parts = raw_message.split(" ");
+            if (parts.length >= 2) {
+                String msg = jx3Service.get_Avatar_chigua(parts[1]);
+                if (Objects.nonNull(msg)) {
+                    gocqService.send_group_message(group_id, msg);
+                } else {
+                    gocqService.send_group_message(group_id, "没啃出来！贴子没了，或出错了！");
+                }
+            }
+        } catch (Exception e) {
+            log.error("啃大瓜失败", e);
+            gocqService.send_group_message(group_id, "啃大瓜失败");
+        }
+    }
+
+
+    private <T> boolean responseFromTiebaItemResponse(long group_id, List<T> objects) {
+        if (objects.isEmpty()) {
+            gocqService.send_group_message(group_id, "未查询到相关物品");
+            return true;
+        }
+        for (Object jx3TiebaItemResponse : objects) {
+            StringTemplate tiebaItemTemplate = new TiebaItemTemplate();
+            String response_content = tiebaItemTemplate.getResultWithTemplate(jx3TiebaItemResponse);
+            gocqService.send_group_message(group_id, response_content);
+        }
+        return false;
     }
 
 
