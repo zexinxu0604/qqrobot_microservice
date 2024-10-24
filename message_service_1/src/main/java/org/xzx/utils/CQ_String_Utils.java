@@ -43,19 +43,27 @@ public class CQ_String_Utils {
      * @description 获取图片的url，分割出&amp;前的第一个元素
      */
     public static String getImageURL(String str) {
-        String url = str.substring(str.indexOf("url=") + 4, str.indexOf("]"));
+        String url = str.substring(str.indexOf("url=") + 4, str.indexOf(",file_size"));
         url = url.replace("amp;", "");
         return url;
     }
 
     /**
      *
-     * @param str [CQ:image,file=2e6a4fdc0bedc592fec7494d72f0d3d5.image,subType=1,url=https://gchat.qpic.cn/gchatpic_new/xx/xx-xx-2E6A4FDC0BEDC592FEC7494D72F0D3D5/0?term=2&amp;is_origin=0]
+     * @param str [CQ:image,summary=&#91;动画表情&#93;,file=000001444e61704361744f6e65426f747c4d736746696c657c327c37313034373832347c373432393238373333363637373930313738357c373432393238373333363637373930313738347c4568516e52415958653338665150437a3158476e666963373934507767686a67334145675f776f6f363579747965656d69514d794248427962325251674c326a41566f514d4745654f5f716e6d305a68727a73344b7133575677.85DE901B1047568B0D198DC03C50AD06.jpg,sub_type=1,file_id=000001444e61704361744f6e65426f747c4d736746696c657c327c37313034373832347c373432393238373333363637373930313738357c373432393238373333363637373930313738347c4568516e52415958653338665150437a3158476e666963373934507767686a67334145675f776f6f363579747965656d69514d794248427962325251674c326a41566f514d4745654f5f716e6d305a68727a73344b7133575677.85DE901B1047568B0D198DC03C50AD06.jpg,url=https://multimedia.nt.qq.com.cn/download?appid=1407&amp;fileid=EhQnRAYXe38fQPCz1XGnfic794Pwghjg3AEg_woo65ytyeemiQMyBHByb2RQgL2jAVoQMGEeO_qnm0Zhrzs4Kq3WVw&amp;spec=0&amp;rkey=CAMSKMa3OFokB_TlXle3aEQvRLKJ2t4MDE-haXDl_2LFDml6RenfaD6oq_M,file_size=28256,file_unique=85DE901B1047568B0D198DC03C50AD06.jpg]
      * @return 2e6a4fdc0bedc592fec7494d72f0d3d5.image
      * @description 获取图片的文件名
      */
     public static String getImageFileName(String str){
-        return str.substring(str.indexOf("file=") + 5, str.indexOf(",url="));
+        String s = str.replace("[", "");
+        s = s.replace("]", "");
+        String[] pieces = s.split(",");
+        for (String piece : pieces) {
+            if (piece.contains("file_unique=")) {
+                return piece.substring(piece.indexOf("file_unique=") + 12);
+            }
+        }
+        return "0";
     }
 
     /**
@@ -75,7 +83,15 @@ public class CQ_String_Utils {
      * @description 获取图片的子类型，1为表情包，0为正常图片
      */
     public static String getImageSubType(String str) {
-        return str.substring(str.indexOf("subType=") + 8, str.indexOf(",url="));
+        String s = str.replace("[", "");
+        s = s.replace("]", "");
+        String[] pieces = s.split(",");
+        for (String piece : pieces) {
+            if (piece.contains("sub_type=")) {
+                return piece.substring(piece.indexOf("sub_type=") + 9);
+            }
+        }
+        return "0";
     }
 
     /**

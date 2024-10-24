@@ -86,13 +86,13 @@ public class GroupMessageListener {
         String imagecq = cqStrings.get(0);
         String imageFileName = CQ_String_Utils.getImageFileName(imagecq);
         ApiResponse<CheckImageResponse> checkImageResponseApiResponse = groupImageService.checkImageFileName(imageFileName);
-        if (checkImageResponseApiResponse.getCode() == ApiResultCode.FAILED.getCode() && CQ_String_Utils.getImageFileSize(imagecq) < imagesize) {
+        System.out.println(checkImageResponseApiResponse);
+        if (checkImageResponseApiResponse.getCode() == ApiResultCode.FAILED.getCode() && "1".equals(CQ_String_Utils.getImageSubType(imagecq))) {
             ImageCQ imageCQ = new ImageCQ();
             imageCQ.setUrl(CQ_String_Utils.getImageURL(imagecq));
             imageCQ.setGroup_id(receivedGroupMessage.getGroup_id());
             imageCQ.setPoster(receivedGroupMessage.getUser_id());
             imageCQ.setFile_name(imageFileName);
-            imageCQ.setFile_size(CQ_String_Utils.getImageFileSize(imagecq));
             ApiResponse<CheckImageResponse> response = groupImageService.insertImage(imageCQ);
             if (response.getCode() == ApiResultCode.SUCCESS.getCode() && response.getData().getCode() == CheckImageResponseCode.IMAGE_DOWNLOAD_SUCCESS.getCode()) {
                 gocqService.send_group_message(receivedGroupMessage.getGroup_id(), "没见过，偷了");
