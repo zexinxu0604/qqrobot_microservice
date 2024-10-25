@@ -22,6 +22,8 @@ public enum GroupServiceEnum {
 
     AVATAR_CHIGUA("avatar_bagua", "阿瓦达啃大瓜", "阿瓦达啃大瓜 贴子链接"),
 
+    JX3_ROLE_CARD("jx3_role_card", "剑网三名片", "名片 角色名或 名片 服务器名 角色名"),
+
     /**
      * 其他服务
      */

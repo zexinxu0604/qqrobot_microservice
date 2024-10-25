@@ -247,5 +247,20 @@ public class Jx3_service {
     }
 
 
+    public String get_jx3_role_card(String role_name) {
+        return get_jx3_role_card(role_name, "破阵子");
+    }
+
+    public String get_jx3_role_card(String role_name, String server) {
+        Jx3RolePictureRequest jx3RolePictureRequest = new Jx3RolePictureRequest(server, role_name, robot_name, ticket);
+        Jx3PictureUrlResponse jx3PictureUrlResponse = springRestService.postWithObject(jx3_url + "data/role/show/card", headers_with_token_v2, jx3RolePictureRequest, Jx3PictureUrlResponse.class);
+        try {
+            return jx3PictureUrlResponse.getData().get("static").asText();
+        } catch (NullPointerException e) {
+            log.error("获取角色名片失败", e);
+            return null;
+        }
+    }
+
 
 }
