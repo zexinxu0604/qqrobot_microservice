@@ -124,7 +124,15 @@ public class CQ_String_Utils {
     }
 
     public static String getQQFromAt(String str) {
-        return str.substring(str.indexOf("qq=") + 3, str.indexOf("]"));
+        String s = str.replace("[", "");
+        s = s.replace("]", "");
+        String[] pieces = s.split(",");
+        for (String piece : pieces) {
+            if (piece.contains("qq=")) {
+                return piece.substring(piece.indexOf("qq=") + 3);
+            }
+        }
+        return "0";
     }
 
     public static long getReplyAtQQ(String str) {
