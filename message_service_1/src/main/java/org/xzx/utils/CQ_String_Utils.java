@@ -43,7 +43,15 @@ public class CQ_String_Utils {
      * @description 获取图片的url，分割出&amp;前的第一个元素
      */
     public static String getImageURL(String str) {
-        String url = str.substring(str.indexOf("url=") + 4, str.indexOf(",file_size"));
+        String s = str.replace("[", "");
+        s = s.replace("]", "");
+        String[] pieces = s.split(",");
+        String url = "";
+        for (String piece : pieces) {
+            if (piece.contains("url=")) {
+                url =  piece.substring(piece.indexOf("url=") + 4);
+            }
+        }
         url = url.replace("amp;", "");
         return url;
     }
@@ -104,7 +112,15 @@ public class CQ_String_Utils {
     }
 
     public static String getIdFromReply(String str) {
-        return str.substring(str.indexOf("id=") + 3, str.indexOf("]"));
+        String s = str.replace("[", "");
+        s = s.replace("]", "");
+        String[] pieces = s.split(",");
+        for (String piece : pieces) {
+            if (piece.contains("id=")) {
+                return piece.substring(piece.indexOf("id=") + 3);
+            }
+        }
+        return "0";
     }
 
     public static String getQQFromAt(String str) {
@@ -124,7 +140,15 @@ public class CQ_String_Utils {
     }
 
     public static int getImageFileSize(String str){
-        return Integer.parseInt(str.substring(str.indexOf("file_size=") + 10, str.indexOf("]")));
+        String s = str.replace("[", "");
+        s = s.replace("]", "");
+        String[] pieces = s.split(",");
+        for (String piece : pieces) {
+            if (piece.contains("file_size=")) {
+                return Integer.parseInt(piece.substring(piece.indexOf("file_size=") + 10));
+            }
+        }
+        return 0;
     }
 
     public static String getGroupServiceCloseMessage(String ServiceName){

@@ -1,5 +1,7 @@
 package org.xzx.plugins;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -220,6 +222,13 @@ public class GroupMessageListener {
         } else {
             gocqService.send_group_message(receivedGroupMessage.getGroup_id(), String.format("关闭 %s 功能失败, 若未使用过该功能请使用一次", serviceName));
         }
+    }
+
+    @RobotListenerHandler(order = 0, regex = "整个活", concurrency = true, isFullMatch = true)
+    public void getWholeActivity(ReceivedGroupMessage receivedGroupMessage) {
+        log.info("整个活功能触发:" + "群号：" + receivedGroupMessage.getGroup_id() + "用户：" + receivedGroupMessage.getUser_id() + "消息：" + receivedGroupMessage.getRaw_message());
+        String api = String.format("[]({\"version\":2})[点击查看涩图](mqqapi://aio/inlinecmd?command=%s&enter=true&reply=false)", "我是狗，汪汪");
+        gocqService.send_group_message(receivedGroupMessage.getGroup_id(), CQ_Generator_Utils.getMarkDownString(api));
     }
 
     public void getRandomImage(long group_id) {

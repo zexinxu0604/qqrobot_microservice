@@ -25,4 +25,8 @@ public class CQ_Generator_Utils {
     public static String getlocalImageUrl(String url) {
         return "group_image/" + url + ".png";
     }
+
+    public static String getMarkDownString(String content) {
+        return "[CQ:markdown,content=" + content + "]";
+    }
 }

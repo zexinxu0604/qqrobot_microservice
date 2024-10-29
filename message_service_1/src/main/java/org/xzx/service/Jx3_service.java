@@ -262,5 +262,20 @@ public class Jx3_service {
         }
     }
 
+    public List<String> get_random_jx3_role_card() {
+        return get_random_jx3_role_card("破阵子");
+    }
+
+    public List<String>  get_random_jx3_role_card(String server) {
+        Jx3RolePictureRequest jx3RolePictureRequest = new Jx3RolePictureRequest(server, "", robot_name, ticket);
+        Jx3PictureUrlResponse jx3PictureUrlResponse = springRestService.postWithObject(jx3_url + "data/role/show/random", headers_with_token_v2, jx3RolePictureRequest, Jx3PictureUrlResponse.class);
+        try {
+            return List.of(jx3PictureUrlResponse.getData().get("avatar").asText(), jx3PictureUrlResponse.getData().get("server").asText(), jx3PictureUrlResponse.getData().get("name").asText());
+        } catch (NullPointerException e) {
+            log.error("获取随机角色名片失败", e);
+            return null;
+        }
+    }
+
 
 }
