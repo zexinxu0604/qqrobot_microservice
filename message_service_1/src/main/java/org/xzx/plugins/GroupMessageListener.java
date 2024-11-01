@@ -1,5 +1,7 @@
 package org.xzx.plugins;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -86,13 +88,13 @@ public class GroupMessageListener {
         String imagecq = cqStrings.get(0);
         String imageFileName = CQ_String_Utils.getImageFileName(imagecq);
         ApiResponse<CheckImageResponse> checkImageResponseApiResponse = groupImageService.checkImageFileName(imageFileName);
-        if (checkImageResponseApiResponse.getCode() == ApiResultCode.FAILED.getCode() && CQ_String_Utils.getImageFileSize(imagecq) < imagesize) {
+        System.out.println(checkImageResponseApiResponse);
+        if (checkImageResponseApiResponse.getCode() == ApiResultCode.FAILED.getCode() && "1".equals(CQ_String_Utils.getImageSubType(imagecq))) {
             ImageCQ imageCQ = new ImageCQ();
             imageCQ.setUrl(CQ_String_Utils.getImageURL(imagecq));
             imageCQ.setGroup_id(receivedGroupMessage.getGroup_id());
             imageCQ.setPoster(receivedGroupMessage.getUser_id());
             imageCQ.setFile_name(imageFileName);
-            imageCQ.setFile_size(CQ_String_Utils.getImageFileSize(imagecq));
             ApiResponse<CheckImageResponse> response = groupImageService.insertImage(imageCQ);
             if (response.getCode() == ApiResultCode.SUCCESS.getCode() && response.getData().getCode() == CheckImageResponseCode.IMAGE_DOWNLOAD_SUCCESS.getCode()) {
                 gocqService.send_group_message(receivedGroupMessage.getGroup_id(), "没见过，偷了");
@@ -222,37 +224,12 @@ public class GroupMessageListener {
         }
     }
 
-    @RobotListenerHandler(isAllRegex = true, concurrency = true)
-    public void replyXiuxianRobot(ReceivedGroupMessage receivedGroupMessage) throws InterruptedException {
-        if (receivedGroupMessage.getGroup_id() == 913324597L && receivedGroupMessage.getUser_id() == 1113654557L) {
-            List<String> greetings = Arrays.asList(
-                    "你好", "吃饭了吗", "早上好", "晚上好", "午安", "晚安", "好久不见", "一切顺利吗", "最近怎么样", "祝你有美好的一天",
-                    "再见", "晚餐吃什么", "早餐吃什么", "午餐吃什么", "你在做什么", "你在哪里", "你几岁了", "你的爱好是什么", "你的工作是什么",
-                    "你的名字是什么", "你的生日是什么时候", "你的家乡在哪里", "你的最爱是什么", "你的梦想是什么", "你的目标是什么",
-                    "你的家人好吗", "你的朋友好吗", "你的同事好吗", "你的宠物好吗", "你的植物好吗", "你的电脑好吗", "你的手机好吗", "你的游戏好吗",
-                    "你的电视好吗", "你的音乐好吗", "你的电影好吗", "你的书好吗", "你的画好吗", "你的旅行好吗", "你的运动好吗", "你的健康好吗",
-                    "你的学习好吗", "你的工作好吗", "你的生活好吗", "你的心情好吗", "你的天气好吗", "你的食物好吗", "你的饮料好吗", "你的衣服好吗",
-                    "你的家好吗", "你的车好吗", "你的鞋好吗", "你的包好吗", "你的眼镜好吗", "你的帽子好吗", "你的手表好吗", "你的项链好吗",
-                    "你的耳环好吗", "你的手链好吗", "你的戒指好吗", "你的钱包好吗", "你的笔记本好吗", "你的相机好吗", "你的音响好吗", "你的灯好吗",
-                    "你的床好吗", "你的椅子好吗", "你的桌子好吗", "你的沙发好吗", "你的电冰箱好吗", "你的洗衣机好吗", "你的烤箱好吗", "你的微波炉好吗"
-                    // Add more greetings here...
-                    // Make sure to have 100 greetings in total
-            );
-            Random random = new Random();
-            int timescope = random.nextInt(5);
-            int num = random.nextInt(3);
-            int k = random.nextInt(100);
-            if (k % 2 == 0) {
-                return;
-            }
-            for (int i = 0; i < num; i++) {
-                Thread.sleep(timescope * 1000);
-                int index = random.nextInt(greetings.size() - 1);
-                gocqService.send_group_message(receivedGroupMessage.getGroup_id(), greetings.get(index));
-            }
-        }
+    @RobotListenerHandler(order = 0, regex = "整个活", concurrency = true, isFullMatch = true)
+    public void getWholeActivity(ReceivedGroupMessage receivedGroupMessage) {
+        log.info("整个活功能触发:" + "群号：" + receivedGroupMessage.getGroup_id() + "用户：" + receivedGroupMessage.getUser_id() + "消息：" + receivedGroupMessage.getRaw_message());
+        String api = String.format("[]({\"version\":2})[点击查看涩图](mqqapi://aio/inlinecmd?command=%s&enter=true&reply=false)", "我是狗，汪汪");
+        gocqService.send_group_message(receivedGroupMessage.getGroup_id(), CQ_Generator_Utils.getMarkDownString(api));
     }
-
 
     public void getRandomImage(long group_id) {
         ImageResponse imageResponse = groupImageService.getRandomImage();

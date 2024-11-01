@@ -320,6 +320,58 @@ public class Jx3GroupMessageListener {
         }
     }
 
+    @RobotListenerHandler(concurrency = true, regex = "^名片 .*$")
+    public void getJx3RoleCard(ReceivedGroupMessage receivedGroupMessage) {
+        if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_ROLE_CARD)) {
+            return;
+        }
+        long group_id = receivedGroupMessage.getGroup_id();
+        String raw_message = receivedGroupMessage.getRaw_message();
+        String[] parts = raw_message.split(" ");
+        if (parts.length == 2) {
+            String msg = jx3Service.get_jx3_role_card(parts[1]);
+            if (Objects.nonNull(msg)) {
+                gocqService.send_group_message(group_id, CQ_Generator_Utils.getImageString(msg));
+            } else {
+                gocqService.send_group_message(group_id, "没查到！");
+            }
+        } else if (parts.length == 3) {
+            String msg = jx3Service.get_jx3_role_card(parts[1], parts[2]);
+            if (Objects.nonNull(msg)) {
+                gocqService.send_group_message(group_id, CQ_Generator_Utils.getImageString(msg));
+            } else {
+                gocqService.send_group_message(group_id, "没查到！");
+            }
+        } else {
+            gocqService.send_group_message(group_id, "请检查格式是否为 名片 角色名 或者 名片 服务器名 角色名");
+        }
+    }
+
+    @RobotListenerHandler(concurrency = true, regex = "^随机名片.*$")
+    public void getRandomRoleCard(ReceivedGroupMessage receivedGroupMessage) {
+        if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.RAMDOM_JX3_ROLE_CARD)) {
+            return;
+        }
+        long group_id = receivedGroupMessage.getGroup_id();
+        String raw_message = receivedGroupMessage.getRaw_message();
+        String[] parts = raw_message.split(" ");
+        if (parts.length == 2) {
+            List<String> msg = jx3Service.get_random_jx3_role_card(parts[1]);
+            if (Objects.nonNull(msg)) {
+                gocqService.send_group_message(group_id, "来自" + msg.get(1) + "的" + msg.get(2) + "\n" + CQ_Generator_Utils.getImageString(msg.get(0)));
+            } else {
+                gocqService.send_group_message(group_id, "没查到！");
+            }
+        } else {
+            List<String> msg = jx3Service.get_random_jx3_role_card();
+            if (Objects.nonNull(msg)) {
+                gocqService.send_group_message(group_id, "来自" + msg.get(1) + "的" + msg.get(2) + "\n" + CQ_Generator_Utils.getImageString(msg.get(0)));
+            } else {
+                gocqService.send_group_message(group_id, "没查到！");
+            }
+        }
+    }
+
 
     private <T> boolean responseFromTiebaItemResponse(long group_id, List<T> objects) {
         if (objects.isEmpty()) {
