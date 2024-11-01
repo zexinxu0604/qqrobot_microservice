@@ -5,6 +5,8 @@ public class Constants {
      * gpt相关
      */
     public static final String DEFAULT_CHAT_MODEL = "gpt-3.5-turbo";
+
+    public static final String GPT_4o_MINI = "gpt-4o-mini";
     public static final String CHAT_SYSTEM_MESSAGE = "You are a helpful assistant.";
 
     /**
