@@ -125,7 +125,10 @@ public class HandlerResolver {
             }
         }
 
-        Map<String, PriorityQueue<EventHandler>> regexMatchMap = regexMessageHandlers.get(message.getClass());
+        Map<String, PriorityQueue<EventHandler>> regexMatchMap = regexMessageHandlers.getOrDefault(message.getClass(), null);
+        if (regexMatchMap == null) {
+            return;
+        }
         for (String regex : regexMatchMap.keySet()) {
             if (message.getRaw_message().matches(regex)) {
                 PriorityQueue<EventHandler> regexMatchQueue = regexMatchMap.get(regex);
