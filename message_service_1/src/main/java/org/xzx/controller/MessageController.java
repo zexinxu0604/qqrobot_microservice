@@ -20,6 +20,7 @@ public class MessageController {
     @RequestMapping("/message")
     public String test(@RequestBody JsonNode jsonNode, HttpServletRequest request) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
+        log.info("message:" + mapper.writeValueAsString(jsonNode));
         if (jsonNode.get("post_type").asText().equals("message")) {
             if (jsonNode.get("message_type").asText().equals("group")) {
                 ReceivedGroupMessage groupMessage = mapper.treeToValue(jsonNode, ReceivedGroupMessage.class);
