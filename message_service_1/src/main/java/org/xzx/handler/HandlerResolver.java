@@ -108,7 +108,7 @@ public class HandlerResolver {
 
 
     public static void handleEvent(Message message) {
-        PriorityQueue<EventHandler> fullMatchQueue = fullMessageHandlers.get(message.getClass()).getOrDefault(message.getRaw_message(), null);
+        PriorityQueue<EventHandler> fullMatchQueue = fullMessageHandlers.getOrDefault(message.getClass(), new HashMap<>()).getOrDefault(message.getRaw_message(), null);
         if (fullMatchQueue != null) {
             for (EventHandler handler : fullMatchQueue) {
 
