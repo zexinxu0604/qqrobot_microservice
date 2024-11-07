@@ -24,7 +24,7 @@ public class MessageCounterConfig {
         log.info("群列表：{}", groupInfoList);
         Map<Long, MessageCounter> messageCounterMap = new ConcurrentHashMap<>();
         for (GroupInfo groupInfo : groupInfoList) {
-            messageCounterMap.put(groupInfo.getGroup_id(), new MessageCounter(groupInfo.getGroup_id(), 0, 20));
+            messageCounterMap.put(groupInfo.getGroup_id(), new MessageCounter(groupInfo.getGroup_id(), 0, Constants.MAX_MESSAGE_COUNT));
         }
         return messageCounterMap;
     }

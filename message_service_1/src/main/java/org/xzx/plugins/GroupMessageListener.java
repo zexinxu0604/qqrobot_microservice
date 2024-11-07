@@ -66,6 +66,9 @@ public class GroupMessageListener {
     @RobotListenerHandler(order = -1, isAllRegex = true)
     public void countMessage(ReceivedGroupMessage receivedGroupMessage) {
         long group_id = receivedGroupMessage.getGroup_id();
+        if (!messageCounterMap.containsKey(group_id)) {
+            messageCounterMap.put(group_id, new MessageCounter(group_id, 0));
+        }
         MessageCounter messageCounter = messageCounterMap.get(group_id);
         messageCounter.addMessageCount();
         if (messageCounter.getMessageCount() == messageCounter.getMaxMessageCount()) {

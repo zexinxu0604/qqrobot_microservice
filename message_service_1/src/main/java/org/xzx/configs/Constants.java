@@ -14,4 +14,9 @@ public class Constants {
      */
     public static final String ALL_REGEX = "^.{1,}$";
 
+    /**
+     * 消息数量到达最大值发送随机图片
+     */
+    public static final int MAX_MESSAGE_COUNT = 20;
+
 }
