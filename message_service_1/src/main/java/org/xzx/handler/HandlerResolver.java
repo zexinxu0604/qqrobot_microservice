@@ -30,7 +30,6 @@ public class HandlerResolver {
 
     private static final Map<Class<? extends Message>, Map<String, PriorityQueue<EventHandler>>> regexMessageHandlers = new HashMap<>();
 
-    
 
     public HandlerResolver(Object bean, BeanFactory factory, Method... declaredMethods) {
         this.bean = bean;
@@ -41,9 +40,25 @@ public class HandlerResolver {
     }
 
     private void resolve() {
+        Class<?> superclass = bean.getClass().getSuperclass();
+        Map<String, Method> superclassDeclaredMethods = new HashMap<>();
+        if (superclass != null) {
+            Method[] superclassMethods = superclass.getDeclaredMethods();
+            for (Method method : superclassMethods) {
+                superclassDeclaredMethods.put(method.getName(), method);
+            }
+        }
+
         for (Method method : declaredMethods) {
             RobotListenerHandler annotation = method.getAnnotation(RobotListenerHandler.class);
-            if (annotation == null) continue;
+            if (annotation == null) {
+                String methodName = method.getName();
+                if (superclassDeclaredMethods.containsKey(methodName)) {
+                    annotation = superclassDeclaredMethods.get(methodName).getAnnotation(RobotListenerHandler.class);
+                } else {
+                    continue;
+                }
+            }
             Class<? extends Message> message = this.methodEvent(method);
             this.addHandlerMethod(annotation, message, method);
         }
@@ -112,8 +127,6 @@ public class HandlerResolver {
         if (fullMatchQueue != null) {
             for (EventHandler handler : fullMatchQueue) {
 
-
-
                 if (handler.annotation().concurrency()) {
                     threadPoolTaskExecutor.execute(() -> handler.accept(message));
                 } else {
@@ -133,6 +146,7 @@ public class HandlerResolver {
             if (message.getRaw_message().matches(regex)) {
                 PriorityQueue<EventHandler> regexMatchQueue = regexMatchMap.get(regex);
                 for (EventHandler handler : regexMatchQueue) {
+                    System.out.println("命中正则表达式: " + regex);
                     if (handler.annotation().concurrency()) {
                         threadPoolTaskExecutor.execute(() -> handler.accept(message));
                     } else {

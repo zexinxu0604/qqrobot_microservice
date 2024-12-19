@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.xzx.Templates.TiebaGuaTemplate;
+import org.xzx.annotation.GroupServiceAuth;
 import org.xzx.annotation.RobotListener;
 import org.xzx.annotation.RobotListenerHandler;
 import org.xzx.bean.Jx3.Jx3Response.Jx3PictureUrlResponse;
@@ -75,7 +76,9 @@ public class Jx3GroupMessageListener {
     }
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "^烟花 .*$")
+    @GroupServiceAuth(service = GroupServiceEnum.JX3_FIREWORK)
     public void getJx3RoleFireworkPicture(ReceivedGroupMessage receivedGroupMessage) {
+        System.out.println("进入烟花方法");
         if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_FIREWORK)) {
             return;
         }

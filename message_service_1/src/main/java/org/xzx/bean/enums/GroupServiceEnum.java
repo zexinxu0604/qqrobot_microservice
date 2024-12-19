@@ -1,5 +1,8 @@
 package org.xzx.bean.enums;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum GroupServiceEnum {
     /**
      * 剑网三服务名称
@@ -80,5 +83,13 @@ public enum GroupServiceEnum {
             }
         }
         return null;
+    }
+
+    public static Map<GroupServiceEnum, String> getGroupServiceEnumMap() {
+        Map<GroupServiceEnum, String> groupServiceEnumMap = new HashMap<>();
+        for (GroupServiceEnum groupServiceEnum : GroupServiceEnum.values()) {
+            groupServiceEnumMap.put(groupServiceEnum, groupServiceEnum.getServiceName());
+        }
+        return groupServiceEnumMap;
     }
 }

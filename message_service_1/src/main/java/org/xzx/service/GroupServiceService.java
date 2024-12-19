@@ -71,7 +71,6 @@ public class GroupServiceService {
             return true;
         }
         if (groupService.getStatus() == 0) {
-            gocqService.send_group_message(group_id, CQ_String_Utils.getGroupServiceCloseMessage(groupServiceEnum.getServiceDesc()));
             return false;
         }
         return true;
