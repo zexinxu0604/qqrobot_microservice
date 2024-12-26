@@ -57,9 +57,6 @@ public class Jx3GroupMessageListener {
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "^属性 .*$")
     public void getJx3RoleDetatilPicture(ReceivedGroupMessage receivedGroupMessage) {
-        if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_ATTRIBUTE)) {
-            return;
-        }
         long group_id = receivedGroupMessage.getGroup_id();
         String raw_message = receivedGroupMessage.getRaw_message();
         String[] parts = raw_message.split(" ");
@@ -78,10 +75,6 @@ public class Jx3GroupMessageListener {
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "^烟花 .*$")
     @GroupServiceAuth(service = GroupServiceEnum.JX3_FIREWORK)
     public void getJx3RoleFireworkPicture(ReceivedGroupMessage receivedGroupMessage) {
-        System.out.println("进入烟花方法");
-        if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_FIREWORK)) {
-            return;
-        }
         long group_id = receivedGroupMessage.getGroup_id();
         String raw_message = receivedGroupMessage.getRaw_message();
         String[] parts = raw_message.split(" ");

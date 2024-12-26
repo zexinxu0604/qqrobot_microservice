@@ -28,7 +28,6 @@ public class ExceptionAspect {
             return joinPoint.proceed(joinPoint.getArgs());
         } catch (IllegalArgumentException e) {
             ReceivedGroupMessage receivedGroupMessage = (ReceivedGroupMessage) joinPoint.getArgs()[0];
-            GroupServiceAuth groupServiceAuth = ((MethodSignature) joinPoint.getSignature()).getMethod().getAnnotation(GroupServiceAuth.class);
             gocqService.send_group_message(receivedGroupMessage.getGroup_id(), e.getMessage());
         } catch (Throwable e) {
             ReceivedGroupMessage receivedGroupMessage = (ReceivedGroupMessage) joinPoint.getArgs()[0];
