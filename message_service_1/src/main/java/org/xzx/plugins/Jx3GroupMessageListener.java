@@ -56,6 +56,7 @@ public class Jx3GroupMessageListener {
 
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "^属性 .*$")
+    @GroupServiceAuth(service = GroupServiceEnum.JX3_ATTRIBUTE)
     public void getJx3RoleDetatilPicture(ReceivedGroupMessage receivedGroupMessage) {
         long group_id = receivedGroupMessage.getGroup_id();
         String raw_message = receivedGroupMessage.getRaw_message();
@@ -88,6 +89,7 @@ public class Jx3GroupMessageListener {
     }
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "^查询 .*$")
+    @GroupServiceAuth(service = GroupServiceEnum.JX3_LUCK)
     public void getJx3RoleLuckPicture(ReceivedGroupMessage receivedGroupMessage) {
         if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_LUCK)) {
             return;
@@ -105,6 +107,7 @@ public class Jx3GroupMessageListener {
     }
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "^招募 .*$")
+    @GroupServiceAuth(service = GroupServiceEnum.JX3_TEAM_RECRUIT)
     public void getJx3TeamRecruitPicture(ReceivedGroupMessage receivedGroupMessage) {
         if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_TEAM_RECRUIT)) {
             return;
@@ -123,6 +126,7 @@ public class Jx3GroupMessageListener {
     }
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "百战", isFullMatch = true)
+    @GroupServiceAuth(service = GroupServiceEnum.JX3_BaiZhan)
     public void getJx3BaizhanBossPicture(ReceivedGroupMessage receivedGroupMessage) {
         if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_BaiZhan)) {
             return;
@@ -133,6 +137,7 @@ public class Jx3GroupMessageListener {
     }
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "^掉落 .*$")
+    @GroupServiceAuth(service = GroupServiceEnum.JX3_BOSS_TREASURE)
     public void getJx3BossTreasurePicture(ReceivedGroupMessage receivedGroupMessage) {
         if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_BOSS_TREASURE)) {
             return;
@@ -151,6 +156,7 @@ public class Jx3GroupMessageListener {
     }
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "^物价 .*$")
+    @GroupServiceAuth(service = GroupServiceEnum.JX3_BLACK_TRADE)
     public void getJx3BlackTradePicture(ReceivedGroupMessage receivedGroupMessage) {
         if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_BLACK_TRADE)) {
             return;
@@ -164,6 +170,7 @@ public class Jx3GroupMessageListener {
     }
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "^日常.*$")
+    @GroupServiceAuth(service = GroupServiceEnum.JX3_DAILY)
     public void getJx3DailyPicture(ReceivedGroupMessage receivedGroupMessage) {
         if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_DAILY)) {
             return;
@@ -188,6 +195,7 @@ public class Jx3GroupMessageListener {
     }
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "^金价.*$")
+    @GroupServiceAuth(service = GroupServiceEnum.JX3_GOLD_PRICE)
     public void getJx3GoldPrice(ReceivedGroupMessage receivedGroupMessage) {
         if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_GOLD_PRICE)) {
             return;
@@ -212,6 +220,7 @@ public class Jx3GroupMessageListener {
     }
 
     @RobotListenerHandler(order = 0, shutdown = true, concurrency = true, regex = "^开服.*$")
+    @GroupServiceAuth(service = GroupServiceEnum.SERVER_OPEN)
     public void getServerStatus(ReceivedGroupMessage receivedGroupMessage) {
         if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.SERVER_OPEN)) {
             return;
@@ -239,6 +248,7 @@ public class Jx3GroupMessageListener {
     }
 
     @RobotListenerHandler(order = 0, concurrency = true, regex = "^贴吧 .*$")
+    @GroupServiceAuth(service = GroupServiceEnum.TIEBA_ITEM)
     public void getTiebaItemUrl(ReceivedGroupMessage receivedGroupMessage) throws IOException {
         if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.TIEBA_ITEM)) {
             return;
@@ -264,6 +274,7 @@ public class Jx3GroupMessageListener {
     }
 
     @RobotListenerHandler(concurrency = true, regex = "^吃瓜.*$")
+    @GroupServiceAuth(service = GroupServiceEnum.TIEBA_CHIGUA)
     public void getTiebaChiGua(ReceivedGroupMessage receivedGroupMessage) throws IOException {
         if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.TIEBA_CHIGUA)) {
             return;
@@ -294,6 +305,7 @@ public class Jx3GroupMessageListener {
     }
 
     @RobotListenerHandler(concurrency = true, regex = "^阿瓦达啃大瓜 .*$")
+    @GroupServiceAuth(service = GroupServiceEnum.AVATAR_CHIGUA)
     public void getAvatarChiGua(ReceivedGroupMessage receivedGroupMessage) {
         if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.AVATAR_CHIGUA)) {
             return;
@@ -317,6 +329,7 @@ public class Jx3GroupMessageListener {
     }
 
     @RobotListenerHandler(concurrency = true, regex = "^名片 .*$")
+    @GroupServiceAuth(service = GroupServiceEnum.JX3_ROLE_CARD)
     public void getJx3RoleCard(ReceivedGroupMessage receivedGroupMessage) {
         if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.JX3_ROLE_CARD)) {
             return;
@@ -344,6 +357,7 @@ public class Jx3GroupMessageListener {
     }
 
     @RobotListenerHandler(concurrency = true, regex = "^随机名片.*$")
+    @GroupServiceAuth(service = GroupServiceEnum.RAMDOM_JX3_ROLE_CARD)
     public void getRandomRoleCard(ReceivedGroupMessage receivedGroupMessage) {
         if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.RAMDOM_JX3_ROLE_CARD)) {
             return;

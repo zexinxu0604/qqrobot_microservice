@@ -33,7 +33,9 @@ public class ExceptionAspect {
             ReceivedGroupMessage receivedGroupMessage = (ReceivedGroupMessage) joinPoint.getArgs()[0];
             GroupServiceAuth groupServiceAuth = ((MethodSignature) joinPoint.getSignature()).getMethod().getAnnotation(GroupServiceAuth.class);
             GroupServiceEnum service = groupServiceAuth.service();
-            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), service.getServiceDesc() + " 服务异常" + e.getMessage());
+            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), service.getServiceDesc() + " 服务异常");
+            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), e.getMessage());
+            gocqService.send_private_message(1113654557L, e.getMessage());
         }
         return null;
     }

@@ -71,6 +71,7 @@ public class GroupMessageListener {
         }
         MessageCounter messageCounter = messageCounterMap.get(group_id);
         messageCounter.addMessageCount();
+        log.info("群号：" + group_id + "消息计数：" + messageCounter.getMessageCount());
         if (messageCounter.getMessageCount() == messageCounter.getMaxMessageCount()) {
             getRandomImage(group_id);
             messageCounter.setMessageCount(0);

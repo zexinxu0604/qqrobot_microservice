@@ -78,7 +78,8 @@ public class Jx3_service {
             return jx3PictureUrlResponse;
         } catch (NullPointerException e) {
             log.error("获取角色奇遇信息失败", e);
-            return null;
+            throw new NullPointerException("获取角色奇遇信息时请求路径或参数出现错误，请检查, 以下是服务器返回的信息: " + jx3PictureUrlResponse.getMsg());
+
         }
     }
 
@@ -98,7 +99,7 @@ public class Jx3_service {
             return jx3PictureUrlResponse;
         } catch (NullPointerException e) {
             log.error("获取招募信息失败", e);
-            return null;
+            throw new NullPointerException("获取招募信息时请求路径或参数出现错误，请检查, 以下是服务器返回的信息: " + jx3PictureUrlResponse.getMsg());
         }
     }
 
@@ -109,7 +110,7 @@ public class Jx3_service {
             return jx3PictureUrlResponse;
         } catch (NullPointerException e) {
             log.error("获取黑市信息失败", e);
-            return null;
+            throw new NullPointerException("获取黑市信息时请求路径或参数出现错误，请检查, 以下是服务器返回的信息: " + jx3PictureUrlResponse.getMsg());
         }
     }
 
@@ -251,14 +252,14 @@ public class Jx3_service {
         return get_jx3_role_card(role_name, "破阵子");
     }
 
-    public String get_jx3_role_card(String role_name, String server) {
+    public String get_jx3_role_card(String server, String role_name) {
         Jx3RolePictureRequest jx3RolePictureRequest = new Jx3RolePictureRequest(server, role_name, robot_name, ticket);
-        Jx3PictureUrlResponse jx3PictureUrlResponse = springRestService.postWithObject(jx3_url + "data/role/show/card", headers_with_token_v2, jx3RolePictureRequest, Jx3PictureUrlResponse.class);
+        Jx3PictureUrlResponse jx3PictureUrlResponse = springRestService.postWithObject(jx3_url + "data/show/card", headers_with_token_v2, jx3RolePictureRequest, Jx3PictureUrlResponse.class);
         try {
-            return jx3PictureUrlResponse.getData().get("static").asText();
+            return jx3PictureUrlResponse.getData().get("showAvatar").asText();
         } catch (NullPointerException e) {
             log.error("获取角色名片失败", e);
-            return null;
+            throw new NullPointerException("获取角色名片时请求路径或参数出现错误，请检查, 以下是服务器返回的信息: " + jx3PictureUrlResponse.getMsg());
         }
     }
 
@@ -268,12 +269,12 @@ public class Jx3_service {
 
     public List<String>  get_random_jx3_role_card(String server) {
         Jx3RolePictureRequest jx3RolePictureRequest = new Jx3RolePictureRequest(server, "", robot_name, ticket);
-        Jx3PictureUrlResponse jx3PictureUrlResponse = springRestService.postWithObject(jx3_url + "data/role/show/random", headers_with_token_v2, jx3RolePictureRequest, Jx3PictureUrlResponse.class);
+        Jx3PictureUrlResponse jx3PictureUrlResponse = springRestService.postWithObject(jx3_url + "data/show/random", headers_with_token_v2, jx3RolePictureRequest, Jx3PictureUrlResponse.class);
         try {
-            return List.of(jx3PictureUrlResponse.getData().get("avatar").asText(), jx3PictureUrlResponse.getData().get("server").asText(), jx3PictureUrlResponse.getData().get("name").asText());
+            return List.of(jx3PictureUrlResponse.getData().get("showAvatar").asText(), jx3PictureUrlResponse.getData().get("serverName").asText(), jx3PictureUrlResponse.getData().get("roleName").asText());
         } catch (NullPointerException e) {
             log.error("获取随机角色名片失败", e);
-            return null;
+            throw new NullPointerException("获取随机角色名片时请求路径或参数出现错误，请检查, 以下是服务器返回的信息: " + jx3PictureUrlResponse.getMsg());
         }
     }
 
