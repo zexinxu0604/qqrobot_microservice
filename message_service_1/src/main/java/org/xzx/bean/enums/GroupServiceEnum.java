@@ -2,6 +2,7 @@ package org.xzx.bean.enums;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 public enum GroupServiceEnum {
     /**
@@ -34,7 +35,7 @@ public enum GroupServiceEnum {
      */
     OPEN_SERVICE("open_service", "开启服务", "开启 服务名"),
     CLOSE_SERVICE("close_service", "关闭服务", "关闭 服务名"),
-    GPT_CHAT("gpt_chat", "GPT聊天", "@机器人 聊天内容"),
+    GPT_CHAT("gpt_chat", "GPT聊天，目前支持多种模型", "@机器人 聊天内容"),
 
     RANDOM_PICTURE("random_picture", "机器人表情包水群", "无触发语句，自动触发"),
     AT_RANDOM_PICTURE("at_random_picture", "表情包", "@机器人即可"),
@@ -91,5 +92,13 @@ public enum GroupServiceEnum {
             groupServiceEnumMap.put(groupServiceEnum, groupServiceEnum.getServiceName());
         }
         return groupServiceEnumMap;
+    }
+
+    public static Map<GroupServiceEnum, ReentrantLock> getAllServiceLockMap() {
+        Map<GroupServiceEnum, ReentrantLock> lockMap = new HashMap<>();
+        for (GroupServiceEnum groupServiceEnum : GroupServiceEnum.values()) {
+            lockMap.put(groupServiceEnum, new ReentrantLock());
+        }
+        return lockMap;
     }
 }

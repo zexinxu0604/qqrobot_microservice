@@ -9,6 +9,10 @@ public class Constants {
     public static final String GPT_4o_MINI = "gpt-4o-mini";
     public static final String CHAT_SYSTEM_MESSAGE = "You are a helpful assistant.";
 
+    public static final String DEEPSEEK_CHAT = "deepseek-chat";
+
+    public static final String DEEPSEEK_REASONER = "deepseek-reasoner";
+
     /**
      * 正则表达式相关
      */

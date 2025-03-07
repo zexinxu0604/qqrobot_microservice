@@ -1,4 +1,4 @@
-package org.xzx.bean.messageUtil;
+package org.xzx.bean.chatBean;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

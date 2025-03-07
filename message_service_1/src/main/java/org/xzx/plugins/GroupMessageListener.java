@@ -1,19 +1,18 @@
 package org.xzx.plugins;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.xzx.annotation.RobotListener;
 import org.xzx.annotation.RobotListenerHandler;
 import org.xzx.bean.Domain.OffWorkRecord;
 import org.xzx.bean.ImageBean.ImageCQ;
+import org.xzx.bean.chatBean.GroupAIContext;
 import org.xzx.bean.enums.*;
 import org.xzx.bean.messageBean.ReceivedGroupMessage;
-import org.xzx.bean.messageUtil.MessageCounter;
-import org.xzx.bean.qqGroupBean.GroupService;
+import org.xzx.bean.chatBean.MessageCounter;
 import org.xzx.bean.response.*;
 import org.xzx.service.*;
 import org.xzx.utils.AliyunOSSUtils;
@@ -23,6 +22,8 @@ import org.xzx.utils.CQ_String_Utils;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 //TODO 设置功能在群聊里的权限
@@ -62,19 +63,37 @@ public class GroupMessageListener {
     @Autowired
     private OffWorkRecordService offWorkRecordService;
 
+    @Autowired
+    @Qualifier("group-chat-context")
+    private Map<Long, GroupAIContext> groupAIContextMap;
 
-    @RobotListenerHandler(order = -1, isAllRegex = true)
-    public void countMessage(ReceivedGroupMessage receivedGroupMessage) {
+    @Autowired
+    @Qualifier("groupServiceLockMap")
+    private Map<Long, Map<GroupServiceEnum, ReentrantLock>> groupServiceLockMap;
+
+    @RobotListenerHandler(order = -1, isAllRegex = true, concurrency = true)
+    public void countMessage(ReceivedGroupMessage receivedGroupMessage) throws InterruptedException {
         long group_id = receivedGroupMessage.getGroup_id();
         if (!messageCounterMap.containsKey(group_id)) {
             messageCounterMap.put(group_id, new MessageCounter(group_id, 0));
+        }
+
+        if (!groupServiceLockMap.containsKey(group_id)) {
+            groupServiceLockMap.put(group_id, GroupServiceEnum.getAllServiceLockMap());
         }
         MessageCounter messageCounter = messageCounterMap.get(group_id);
         messageCounter.addMessageCount();
         log.info("群号：" + group_id + "消息计数：" + messageCounter.getMessageCount());
         if (messageCounter.getMessageCount() >= messageCounter.getMaxMessageCount()) {
-            getRandomImage(group_id);
-            messageCounter.setMessageCount(0);
+            ReentrantLock lock = groupServiceLockMap.get(group_id).get(GroupServiceEnum.RANDOM_PICTURE);
+            if (lock.tryLock(1, TimeUnit.SECONDS)) {
+                try {
+                    getRandomImage(group_id);
+                    messageCounter.setMessageCount(0);
+                } finally {
+                    lock.unlock();
+                }
+            }
         }
     }
 
@@ -147,15 +166,27 @@ public class GroupMessageListener {
     }
 
     @RobotListenerHandler(order = 2, concurrency = true, isAllRegex = true)
-    public void getAIResponse(ReceivedGroupMessage receivedGroupMessage) {
+    public void getAIResponse(ReceivedGroupMessage receivedGroupMessage) throws InterruptedException {
         if (receivedGroupMessage.getRaw_message().startsWith(CQ_Generator_Utils.getAtString(qq)) && !CQ_Generator_Utils.getAtString(qq).equals(receivedGroupMessage.getRaw_message()) && !CQ_Generator_Utils.getAtString(qq).equals(receivedGroupMessage.getRaw_message() + " ")){
-            if(!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.GPT_CHAT)){
+            long group_id = receivedGroupMessage.getGroup_id();
+            if(!groupServiceService.checkServiceStatus(group_id, GroupServiceEnum.GPT_CHAT)){
                 return;
             }
-            log.info("AI功能触发:" + "群号：" + receivedGroupMessage.getGroup_id() + "用户：" + receivedGroupMessage.getUser_id() + "消息：" + receivedGroupMessage.getRaw_message());
-            String message = receivedGroupMessage.getRaw_message().replace(CQ_Generator_Utils.getAtString(qq), "");
-            String response = chatAIService.getChatAIResponse(message);
-            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), response);
+            if (!groupServiceLockMap.containsKey(group_id)) {
+                groupServiceLockMap.put(group_id, GroupServiceEnum.getAllServiceLockMap());
+            }
+            ReentrantLock lock = groupServiceLockMap.get(group_id).get(GroupServiceEnum.GPT_CHAT);
+            if (lock.tryLock(1, TimeUnit.SECONDS)) {
+                log.info("AI功能触发:" + "群号：" + receivedGroupMessage.getGroup_id() + "用户：" + receivedGroupMessage.getUser_id() + "消息：" + receivedGroupMessage.getRaw_message());
+                try {
+                    String message = receivedGroupMessage.getRaw_message().replace(CQ_Generator_Utils.getAtString(qq), "");
+
+                } finally {
+                    lock.unlock();
+                }
+            } else {
+                gocqService.send_group_message(group_id, "当前有回复正在生成中，请稍后再试");
+            }
         }
     }
 

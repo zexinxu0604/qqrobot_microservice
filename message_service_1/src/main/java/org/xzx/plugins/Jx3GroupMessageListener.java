@@ -13,7 +13,7 @@ import org.xzx.bean.Jx3.Jx3Response.Jx3TiebaGuaResponse;
 import org.xzx.bean.Jx3.Jx3Response.Jx3TiebaItemResponse;
 import org.xzx.bean.enums.GroupServiceEnum;
 import org.xzx.bean.messageBean.ReceivedGroupMessage;
-import org.xzx.bean.messageUtil.MessageCounter;
+import org.xzx.bean.chatBean.MessageCounter;
 import org.xzx.service.Gocq_service;
 import org.xzx.service.GroupImageService;
 import org.xzx.service.GroupServiceService;

@@ -1,11 +1,14 @@
 package org.xzx.scheduleTasks;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.xzx.bean.Domain.OffWorkRecord;
+import org.xzx.bean.chatBean.MessageCounter;
 import org.xzx.bean.enums.GroupServiceEnum;
+import org.xzx.bean.qqGroupBean.GroupInfo;
 import org.xzx.service.Gocq_service;
 import org.xzx.service.GroupServiceService;
 import org.xzx.service.OffWorkRecordService;
@@ -16,6 +19,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Component
 public class ScheduleGroupServiceTask {
@@ -27,6 +32,17 @@ public class ScheduleGroupServiceTask {
 
     @Autowired
     private Gocq_service gocqService;
+
+    @Autowired
+    @Qualifier("GroupList")
+    private List<Long> grouplist;
+
+    @Autowired
+    @Qualifier("groupServiceLockMap")
+    private Map<Long, Map<GroupServiceEnum, ReentrantLock>> groupServiceLockMap;
+
+    @Autowired
+    private Map<Long, MessageCounter> messageCounterMap;
 
     @Scheduled(cron = "0 0 7 * * ?")
     public void updateGroupService() {
@@ -69,5 +85,17 @@ public class ScheduleGroupServiceTask {
         }
     }
 
+    @Scheduled(cron = "0/30 * * * * ?")
+    public void freshGroupList() {
+        grouplist = gocqService.get_group_list().stream().map(GroupInfo::getGroup_id).toList();
+        for (Long group_id: grouplist) {
+            if (!messageCounterMap.containsKey(group_id)) {
+                messageCounterMap.put(group_id, new MessageCounter(group_id, 0));
+            }
+            if (!groupServiceLockMap.containsKey(group_id)) {
+                groupServiceLockMap.put(group_id, GroupServiceEnum.getAllServiceLockMap());
+            }
+        }
+    }
 
 }

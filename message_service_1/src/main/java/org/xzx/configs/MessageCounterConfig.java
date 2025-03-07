@@ -4,7 +4,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.xzx.bean.messageUtil.MessageCounter;
+import org.xzx.bean.chatBean.MessageCounter;
 import org.xzx.bean.qqGroupBean.GroupInfo;
 import org.xzx.service.Gocq_service;
 
