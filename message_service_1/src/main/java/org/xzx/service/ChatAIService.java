@@ -1,5 +1,10 @@
 package org.xzx.service;
 import com.openai.client.OpenAIClient;
+import com.openai.client.okhttp.OpenAIOkHttpClient;
+import com.openai.models.ChatCompletionCreateParams;
+import com.openai.models.ChatCompletionMessage;
+import com.openai.models.ChatCompletionMessageParam;
+import com.openai.models.ChatModel;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -20,7 +25,11 @@ public class ChatAIService {
     @Autowired
     @Qualifier("group-chat-context")
     private Map<Long, GroupAIContext> groupAIContextMap;
-    public String getChatAIResponse(long group_id, String message) {
 
+
+    public String getChatAIResponse(long group_id, String message) {
+        OpenAIClient openAIClient = OpenAIOkHttpClient.builder().baseUrl().apiKey("YOUR API KEY").build();
+        ChatCompletionMessageParam chatCompletionMessageParam = ChatCompletionMessageParam.ofUser()
+        ChatCompletionCreateParams params = ChatCompletionCreateParams.builder().messages().build();
     }
 }
