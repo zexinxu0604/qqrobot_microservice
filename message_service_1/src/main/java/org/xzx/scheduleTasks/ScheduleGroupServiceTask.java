@@ -9,6 +9,7 @@ import org.xzx.bean.Domain.OffWorkRecord;
 import org.xzx.bean.chatBean.MessageCounter;
 import org.xzx.bean.enums.GroupServiceEnum;
 import org.xzx.bean.qqGroupBean.GroupInfo;
+import org.xzx.configs.Constants;
 import org.xzx.service.Gocq_service;
 import org.xzx.service.GroupServiceService;
 import org.xzx.service.OffWorkRecordService;
@@ -90,7 +91,7 @@ public class ScheduleGroupServiceTask {
         grouplist = gocqService.get_group_list().stream().map(GroupInfo::getGroup_id).toList();
         for (Long group_id: grouplist) {
             if (!messageCounterMap.containsKey(group_id)) {
-                messageCounterMap.put(group_id, new MessageCounter(group_id, 0));
+                messageCounterMap.put(group_id, new MessageCounter(group_id, 0, Constants.MAX_MESSAGE_COUNT));
             }
             if (!groupServiceLockMap.containsKey(group_id)) {
                 groupServiceLockMap.put(group_id, GroupServiceEnum.getAllServiceLockMap());

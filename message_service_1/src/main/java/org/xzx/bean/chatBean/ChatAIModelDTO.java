@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.xzx.bean.enums.AiModels;
 import org.xzx.configs.Constants;
 
 import java.util.List;
@@ -22,7 +23,7 @@ public class ChatAIModelDTO {
         ChatAIRole chatAIRole = new ChatAIRole("user", message);
         List<ChatAIRole> chatAIRoleList = List.of(systemRole, chatAIRole);
         return ChatAIModelDTO.builder()
-                .model(Constants.GPT_4o_MINI)
+                .model(AiModels.DEEPSEEK_CHAT.getModel())
                 .messages(chatAIRoleList)
                 .build();
     }

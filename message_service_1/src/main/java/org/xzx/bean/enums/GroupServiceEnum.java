@@ -42,7 +42,15 @@ public enum GroupServiceEnum {
 
     STEAL_IMAGE("steal_image", "偷图", "暂时关闭"),
 
-    OFF_WORK_RECORD("off_work_record", "下班打卡", "发送下班或者以下班开头不超过三个字的消息即可打卡");
+    OFF_WORK_RECORD("off_work_record", "下班打卡", "发送下班或者以下班开头不超过三个字的消息即可打卡"),
+
+    LIST_ALL_AI_MODEL("list_all_ai_model", "列出所有可用AI模型", "模型列表"),
+
+    CHANGE_AI_MODEL("change_ai_model", "切换AI模型", "切换模型 模型名"),
+
+    AI_RANDOM_CHAT("ai_random_chat", "AI随机聊天", "无触发语句，自动触发"),
+
+    CHANGE_AI_CHARACTER("change_ai_character", "切换AI角色", "切换角色 角色名");
 
     private final String serviceName;
 
@@ -101,4 +109,13 @@ public enum GroupServiceEnum {
         }
         return lockMap;
     }
+
+    public static Map<GroupServiceEnum, Integer> getGroupServiceCounterMap() {
+        Map<GroupServiceEnum, Integer> counterMap = new HashMap<>();
+        for (GroupServiceEnum groupServiceEnum : GroupServiceEnum.values()) {
+            counterMap.put(groupServiceEnum, 0);
+        }
+        return counterMap;
+    }
+
 }

@@ -14,6 +14,7 @@ import org.xzx.bean.enums.*;
 import org.xzx.bean.messageBean.ReceivedGroupMessage;
 import org.xzx.bean.chatBean.MessageCounter;
 import org.xzx.bean.response.*;
+import org.xzx.configs.Constants;
 import org.xzx.service.*;
 import org.xzx.utils.AliyunOSSUtils;
 import org.xzx.utils.CQ_Generator_Utils;
@@ -74,22 +75,41 @@ public class GroupMessageListener {
     @RobotListenerHandler(order = -1, isAllRegex = true, concurrency = true)
     public void countMessage(ReceivedGroupMessage receivedGroupMessage) throws InterruptedException {
         long group_id = receivedGroupMessage.getGroup_id();
+        String message = receivedGroupMessage.getRaw_message();
         if (!messageCounterMap.containsKey(group_id)) {
-            messageCounterMap.put(group_id, new MessageCounter(group_id, 0));
+            messageCounterMap.put(group_id, new MessageCounter(group_id, 0, Constants.MAX_MESSAGE_COUNT));
         }
 
         if (!groupServiceLockMap.containsKey(group_id)) {
             groupServiceLockMap.put(group_id, GroupServiceEnum.getAllServiceLockMap());
         }
+
         MessageCounter messageCounter = messageCounterMap.get(group_id);
-        messageCounter.addMessageCount();
+        messageCounter.addMessageCount(GroupServiceEnum.RANDOM_PICTURE);
+        messageCounter.addMessageCount(GroupServiceEnum.AI_RANDOM_CHAT);
+
         log.info("群号：" + group_id + "消息计数：" + messageCounter.getMessageCount());
-        if (messageCounter.getMessageCount() >= messageCounter.getMaxMessageCount()) {
+        if (messageCounter.getGroupServiceEnumIntegerMap().get(GroupServiceEnum.RANDOM_PICTURE) >= messageCounter.getMaxMessageCount()) {
             ReentrantLock lock = groupServiceLockMap.get(group_id).get(GroupServiceEnum.RANDOM_PICTURE);
             if (lock.tryLock(1, TimeUnit.SECONDS)) {
                 try {
                     getRandomImage(group_id);
-                    messageCounter.setMessageCount(0);
+                    messageCounter.setMessageCount(GroupServiceEnum.RANDOM_PICTURE, 0);
+                } finally {
+                    lock.unlock();
+                }
+            }
+        }
+
+        if (messageCounter.getGroupServiceEnumIntegerMap().get(GroupServiceEnum.AI_RANDOM_CHAT) >= 17) {
+            ReentrantLock lock = groupServiceLockMap.get(group_id).get(GroupServiceEnum.AI_RANDOM_CHAT);
+            if (lock.tryLock(1, TimeUnit.SECONDS)) {
+                try {
+                    String message1 = chatAIService.getChatAIResponse(group_id, message);
+                    if (Objects.nonNull(message1)) {
+                        gocqService.send_group_message(group_id, message1);
+                    }
+                    messageCounter.setMessageCount(GroupServiceEnum.AI_RANDOM_CHAT, 0);
                 } finally {
                     lock.unlock();
                 }
@@ -180,7 +200,7 @@ public class GroupMessageListener {
                 log.info("AI功能触发:" + "群号：" + receivedGroupMessage.getGroup_id() + "用户：" + receivedGroupMessage.getUser_id() + "消息：" + receivedGroupMessage.getRaw_message());
                 try {
                     String message = receivedGroupMessage.getRaw_message().replace(CQ_Generator_Utils.getAtString(qq), "");
-
+                    gocqService.send_group_message(group_id, chatAIService.getChatAIResponse(group_id, message));
                 } finally {
                     lock.unlock();
                 }
@@ -242,6 +262,55 @@ public class GroupMessageListener {
             gocqService.send_group_message(receivedGroupMessage.getGroup_id(), String.format("开启 %s 功能失败, 若未使用过该功能请使用一次", serviceName));
         }
     }
+
+    @RobotListenerHandler(order = 0, regex = "^切换模型 .*$")
+    public void changeModel(ReceivedGroupMessage receivedGroupMessage) {
+        String message = receivedGroupMessage.getRaw_message();
+        String modelName = message.substring(5);
+        long group_id = receivedGroupMessage.getGroup_id();
+        GroupAIContext groupAIContext = groupAIContextMap.get(receivedGroupMessage.getGroup_id());
+        if (groupAIContext == null) {
+            groupAIContext = new GroupAIContext(group_id, modelName);
+            groupAIContextMap.put(receivedGroupMessage.getGroup_id(), groupAIContext);
+        }
+
+        if (AiModels.validateModelName(modelName)) {
+            groupAIContext.setAiModel(modelName);
+            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), String.format("切换模型为 %s 成功", modelName));
+        } else {
+            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), String.format("找不到%s对应模型,请输入<模型列表>指令查看所有可用模型", modelName));
+        }
+    }
+
+    @RobotListenerHandler(order = 0, regex = "^切换人格 .*$")
+    public void changeCharacter(ReceivedGroupMessage receivedGroupMessage) {
+        String message = receivedGroupMessage.getRaw_message();
+        String characterName = message.substring(5);
+        long group_id = receivedGroupMessage.getGroup_id();
+        GroupAIContext groupAIContext = groupAIContextMap.get(receivedGroupMessage.getGroup_id());
+        if (groupAIContext == null) {
+            groupAIContext = new GroupAIContext(group_id, AiModels.DEEPSEEK_CHAT.getModel());
+            groupAIContextMap.put(group_id, groupAIContext);
+        }
+
+        if (AiCharacters.validateCharacterName(characterName)) {
+            groupAIContext.setAiCharacters(AiCharacters.getCharacterByName(characterName));
+            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), String.format("切换人格为 %s 成功", characterName));
+        } else {
+            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), String.format("找不到对应人格,当前可用人格有 %s ", AiCharacters.listCharacters()));
+        }
+    }
+
+    @RobotListenerHandler(order = 0, regex = "^(模型列表)$")
+    public void listAllModels(ReceivedGroupMessage receivedGroupMessage) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("目前支持的模型有:\n");
+        for (AiModels aiModels : AiModels.values()) {
+            stringBuilder.append(aiModels.getModel()).append("\n");
+        }
+        gocqService.send_group_message(receivedGroupMessage.getGroup_id(), stringBuilder.toString());
+    }
+
 
     @RobotListenerHandler(order = 0, regex = "^关闭 .*$")
     public void closeService(ReceivedGroupMessage receivedGroupMessage) {
