@@ -88,25 +88,28 @@ public class GroupMessageListener {
         messageCounter.addMessageCount(GroupServiceEnum.RANDOM_PICTURE);
         messageCounter.addMessageCount(GroupServiceEnum.AI_RANDOM_CHAT);
 
-        log.info("群号：" + group_id + "消息计数：" + messageCounter.getMessageCount());
+
         if (messageCounter.getGroupServiceEnumIntegerMap().get(GroupServiceEnum.RANDOM_PICTURE) >= messageCounter.getMaxMessageCount()) {
             ReentrantLock lock = groupServiceLockMap.get(group_id).get(GroupServiceEnum.RANDOM_PICTURE);
-            if (lock.tryLock(1, TimeUnit.SECONDS)) {
+            if (lock.tryLock(1, TimeUnit.MILLISECONDS)) {
                 try {
                     getRandomImage(group_id);
                     messageCounter.setMessageCount(GroupServiceEnum.RANDOM_PICTURE, 0);
                 } finally {
                     lock.unlock();
                 }
+            } else {
+                log.info("当前有图片正在回复中，计数器为：" + messageCounter.getGroupServiceEnumIntegerMap().get(GroupServiceEnum.RANDOM_PICTURE));
             }
         }
 
+        log.info("群号：" + group_id + "消息计数：" + messageCounter.getGroupServiceEnumIntegerMap().get(GroupServiceEnum.AI_RANDOM_CHAT));
         if (messageCounter.getGroupServiceEnumIntegerMap().get(GroupServiceEnum.AI_RANDOM_CHAT) >= 17) {
             if (message.matches("^\\[CQ:image,[^\\]]*\\]$")) {
                 return;
             }
             ReentrantLock lock = groupServiceLockMap.get(group_id).get(GroupServiceEnum.AI_RANDOM_CHAT);
-            if (lock.tryLock(1, TimeUnit.SECONDS)) {
+            if (lock.tryLock(1, TimeUnit.MILLISECONDS)) {
                 try {
                     String message1 = chatAIService.getRandomAIReply(group_id, message);
                     if (Objects.nonNull(message1)) {
@@ -116,9 +119,12 @@ public class GroupMessageListener {
                 } finally {
                     lock.unlock();
                 }
+            } else {
+                log.info("当前有回复正在生成中，计数器为：" + messageCounter.getGroupServiceEnumIntegerMap().get(GroupServiceEnum.AI_RANDOM_CHAT));
             }
         }
     }
+
 
     /**
      * Check if the received group message contains an image and process it accordingly.
