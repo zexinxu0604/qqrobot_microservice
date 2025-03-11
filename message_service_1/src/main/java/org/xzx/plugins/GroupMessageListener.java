@@ -108,7 +108,7 @@ public class GroupMessageListener {
             ReentrantLock lock = groupServiceLockMap.get(group_id).get(GroupServiceEnum.AI_RANDOM_CHAT);
             if (lock.tryLock(1, TimeUnit.SECONDS)) {
                 try {
-                    String message1 = chatAIService.getChatAIResponse(group_id, message);
+                    String message1 = chatAIService.getRandomAIReply(group_id, message);
                     if (Objects.nonNull(message1)) {
                         gocqService.send_group_message(group_id, message1);
                     }
