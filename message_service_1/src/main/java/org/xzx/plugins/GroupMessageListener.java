@@ -102,6 +102,9 @@ public class GroupMessageListener {
         }
 
         if (messageCounter.getGroupServiceEnumIntegerMap().get(GroupServiceEnum.AI_RANDOM_CHAT) >= 17) {
+            if (message.matches("^\\[CQ:image,[^\\]]*\\]$")) {
+                return;
+            }
             ReentrantLock lock = groupServiceLockMap.get(group_id).get(GroupServiceEnum.AI_RANDOM_CHAT);
             if (lock.tryLock(1, TimeUnit.SECONDS)) {
                 try {
