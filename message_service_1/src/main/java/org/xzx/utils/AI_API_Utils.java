@@ -10,6 +10,9 @@ import org.xzx.bean.chatBean.ChatAIRole;
 import org.xzx.bean.enums.AiModels;
 import org.xzx.configs.Constants;
 
+import java.util.Objects;
+import java.util.Queue;
+
 @Component
 @RefreshScope
 public class AI_API_Utils {
@@ -47,5 +50,14 @@ public class AI_API_Utils {
         }
 
         return null;
+    }
+
+    public String getBeforeMessage(Queue<ChatAIRole> queue) {
+        StringBuilder sb = new StringBuilder();
+        while (!queue.isEmpty()) {
+            ChatAIRole role = queue.poll();
+            sb.append(role.getRole()).append(": ").append(role.getContent()).append("\n");
+        }
+        return sb.toString();
     }
 }

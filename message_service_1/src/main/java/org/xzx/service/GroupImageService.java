@@ -5,7 +5,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.xzx.bean.ImageBean.GroupImage;
+import org.xzx.bean.Domain.GroupImage;
 import org.xzx.bean.ImageBean.ImageCQ;
 import org.xzx.bean.enums.ApiResultCode;
 import org.xzx.bean.enums.CheckImageResponseCode;
@@ -17,7 +17,6 @@ import org.xzx.utils.AliyunOSSUtils;
 import org.xzx.utils.String_Utils;
 import org.xzx.utils.Url_utils;
 
-import java.awt.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;

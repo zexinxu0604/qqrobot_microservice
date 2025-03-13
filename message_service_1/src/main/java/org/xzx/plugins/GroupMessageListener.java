@@ -7,8 +7,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.xzx.annotation.RobotListener;
 import org.xzx.annotation.RobotListenerHandler;
+import org.xzx.bean.Domain.AICharacter;
 import org.xzx.bean.Domain.OffWorkRecord;
 import org.xzx.bean.ImageBean.ImageCQ;
+import org.xzx.bean.chatBean.ChatAIRole;
 import org.xzx.bean.chatBean.GroupAIContext;
 import org.xzx.bean.enums.*;
 import org.xzx.bean.messageBean.ReceivedGroupMessage;
@@ -16,6 +18,7 @@ import org.xzx.bean.chatBean.MessageCounter;
 import org.xzx.bean.response.*;
 import org.xzx.configs.Constants;
 import org.xzx.service.*;
+import org.xzx.utils.AI_API_Utils;
 import org.xzx.utils.AliyunOSSUtils;
 import org.xzx.utils.CQ_Generator_Utils;
 import org.xzx.utils.CQ_String_Utils;
@@ -25,6 +28,7 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 
 //TODO 设置功能在群聊里的权限
@@ -69,8 +73,18 @@ public class GroupMessageListener {
     private Map<Long, GroupAIContext> groupAIContextMap;
 
     @Autowired
+    @Qualifier("group-message-store-queue")
+    private Map<Long, Queue<ChatAIRole>> groupMessageStoreQueueMap;
+
+    @Autowired
     @Qualifier("groupServiceLockMap")
     private Map<Long, Map<GroupServiceEnum, ReentrantLock>> groupServiceLockMap;
+
+    @Autowired
+    private AICharacterService aiCharacterService;
+
+    @Autowired
+    private AI_API_Utils aiApiUtils;
 
     @RobotListenerHandler(order = -1, isAllRegex = true, concurrency = true)
     public void countMessage(ReceivedGroupMessage receivedGroupMessage) throws InterruptedException {
@@ -105,13 +119,17 @@ public class GroupMessageListener {
 
         log.info("群号：" + group_id + "消息计数：" + messageCounter.getGroupServiceEnumIntegerMap().get(GroupServiceEnum.AI_RANDOM_CHAT));
         if (messageCounter.getGroupServiceEnumIntegerMap().get(GroupServiceEnum.AI_RANDOM_CHAT) >= 17) {
+            if (!groupServiceService.checkServiceStatus(group_id, GroupServiceEnum.AI_RANDOM_CHAT)) {
+                return;
+            }
             if (message.matches("^\\[CQ:image,[^\\]]*\\]$")) {
                 return;
             }
             ReentrantLock lock = groupServiceLockMap.get(group_id).get(GroupServiceEnum.AI_RANDOM_CHAT);
             if (lock.tryLock(1, TimeUnit.MILLISECONDS)) {
                 try {
-                    String message1 = chatAIService.getRandomAIReply(group_id, message);
+                    Queue<ChatAIRole> queue = groupMessageStoreQueueMap.get(group_id);
+                    String message1 = chatAIService.getRandomAIReply(group_id, aiApiUtils.getBeforeMessage(queue));
                     if (Objects.nonNull(message1)) {
                         gocqService.send_group_message(group_id, message1);
                     }
@@ -125,6 +143,30 @@ public class GroupMessageListener {
         }
     }
 
+    //todo 细分各个CQ码的处理
+    @RobotListenerHandler(order = -1, isAllRegex = true, concurrency = true)
+    public void restoreMessageQueue(ReceivedGroupMessage receivedGroupMessage) {
+        long group_id = receivedGroupMessage.getGroup_id();
+        String message = receivedGroupMessage.getRaw_message();
+        Queue<ChatAIRole> queue = groupMessageStoreQueueMap.get(group_id);
+        if (Objects.isNull(queue)) {
+            queue = new LinkedList<>();
+            groupMessageStoreQueueMap.put(group_id, queue);
+        }
+        if (queue.size() >= 10) {
+            queue.poll();
+        }
+        List<String> cqStrings = CQ_String_Utils.getCQStrings(message);
+        for (String cqString : cqStrings) {
+            message = message.replace(cqString, "");
+        }
+        if (!message.isEmpty()) {
+            queue.offer(new ChatAIRole(receivedGroupMessage.getSender().getNickname(), message));
+        }
+        groupMessageStoreQueueMap.put(group_id, queue);
+        log.info(queue.toString());
+    }
+
 
     /**
      * Check if the received group message contains an image and process it accordingly.
@@ -133,7 +175,7 @@ public class GroupMessageListener {
      */
     @RobotListenerHandler(order = 1, shutdown = true, regex = "^\\[CQ:image,[^\\]]*\\]$")
     public void checkImage(ReceivedGroupMessage receivedGroupMessage) {
-        if(!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.RANDOM_PICTURE)){
+        if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.RANDOM_PICTURE)) {
             return;
         }
         List<String> cqStrings = CQ_String_Utils.getCQStrings(receivedGroupMessage.getRaw_message());
@@ -187,7 +229,7 @@ public class GroupMessageListener {
     public void getRandomImage(ReceivedGroupMessage receivedGroupMessage) {
         log.info(receivedGroupMessage.getRaw_message());
         if (receivedGroupMessage.getRaw_message().equals(CQ_Generator_Utils.getAtString(qq)) || receivedGroupMessage.getRaw_message().equals(CQ_Generator_Utils.getAtString(qq) + " ")) {
-            if(!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.AT_RANDOM_PICTURE)){
+            if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.AT_RANDOM_PICTURE)) {
                 return;
             }
             getRandomImage(receivedGroupMessage.getGroup_id());
@@ -196,16 +238,16 @@ public class GroupMessageListener {
 
     @RobotListenerHandler(order = 2, concurrency = true, isAllRegex = true)
     public void getAIResponse(ReceivedGroupMessage receivedGroupMessage) throws InterruptedException {
-        if (receivedGroupMessage.getRaw_message().startsWith(CQ_Generator_Utils.getAtString(qq)) && !CQ_Generator_Utils.getAtString(qq).equals(receivedGroupMessage.getRaw_message()) && !CQ_Generator_Utils.getAtString(qq).equals(receivedGroupMessage.getRaw_message() + " ")){
+        if (receivedGroupMessage.getRaw_message().startsWith(CQ_Generator_Utils.getAtString(qq)) && !CQ_Generator_Utils.getAtString(qq).equals(receivedGroupMessage.getRaw_message()) && !CQ_Generator_Utils.getAtString(qq).equals(receivedGroupMessage.getRaw_message() + " ")) {
             long group_id = receivedGroupMessage.getGroup_id();
-            if(!groupServiceService.checkServiceStatus(group_id, GroupServiceEnum.GPT_CHAT)){
+            if (!groupServiceService.checkServiceStatus(group_id, GroupServiceEnum.GPT_CHAT)) {
                 return;
             }
             if (!groupServiceLockMap.containsKey(group_id)) {
                 groupServiceLockMap.put(group_id, GroupServiceEnum.getAllServiceLockMap());
             }
             ReentrantLock lock = groupServiceLockMap.get(group_id).get(GroupServiceEnum.GPT_CHAT);
-            if (lock.tryLock(1, TimeUnit.SECONDS)) {
+            if (lock.tryLock(1, TimeUnit.MILLISECONDS)) {
                 log.info("AI功能触发:" + "群号：" + receivedGroupMessage.getGroup_id() + "用户：" + receivedGroupMessage.getUser_id() + "消息：" + receivedGroupMessage.getRaw_message());
                 try {
                     String message = receivedGroupMessage.getRaw_message().replace(CQ_Generator_Utils.getAtString(qq), "");
@@ -221,7 +263,7 @@ public class GroupMessageListener {
 
     @RobotListenerHandler(order = 0, concurrency = true, regex = "^下班$|^下班.$")
     public void offWorkRecord(ReceivedGroupMessage receivedGroupMessage) {
-        if(!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.OFF_WORK_RECORD)){
+        if (!groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), GroupServiceEnum.OFF_WORK_RECORD)) {
             return;
         }
         log.info("下班功能触发:" + "群号：" + receivedGroupMessage.getGroup_id() + "用户：" + receivedGroupMessage.getUser_id() + "消息：" + receivedGroupMessage.getRaw_message());
@@ -232,14 +274,14 @@ public class GroupMessageListener {
         if (offWorkRecord == null) {
             Date date = new Date();
             offWorkRecord = new OffWorkRecord(receivedGroupMessage.getGroup_id(), receivedGroupMessage.getUser_id(), localDate, date);
-            if(offWorkRecordService.insertOffWorkRecord(offWorkRecord)){
+            if (offWorkRecordService.insertOffWorkRecord(offWorkRecord)) {
                 gocqService.send_group_message(receivedGroupMessage.getGroup_id(), "打卡成功！打卡时间为：" + sdf.format(offWorkRecord.getOffwork_time()));
             } else {
                 gocqService.send_group_message(receivedGroupMessage.getGroup_id(), "打卡失败！");
             }
         } else {
             offWorkRecord.setOffwork_time(new Date());
-            if(offWorkRecordService.updateOffWorkRecordByGroupIdAndMemberIdAndOffworkDay(receivedGroupMessage.getGroup_id(), receivedGroupMessage.getUser_id(), localDate, offWorkRecord.getOffwork_time())){
+            if (offWorkRecordService.updateOffWorkRecordByGroupIdAndMemberIdAndOffworkDay(receivedGroupMessage.getGroup_id(), receivedGroupMessage.getUser_id(), localDate, offWorkRecord.getOffwork_time())) {
                 gocqService.send_group_message(receivedGroupMessage.getGroup_id(), "打卡成功！打卡时间为：" + sdf.format(offWorkRecord.getOffwork_time()));
             } else {
                 gocqService.send_group_message(receivedGroupMessage.getGroup_id(), "打卡失败！");
@@ -265,6 +307,7 @@ public class GroupMessageListener {
             gocqService.send_group_message(receivedGroupMessage.getGroup_id(), String.format("找不到%s对应服务", serviceName));
             return;
         }
+        groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), groupServiceEnum);
         if (groupServiceService.openGroupService(receivedGroupMessage.getGroup_id(), groupServiceEnum.getServiceName())) {
             gocqService.send_group_message(receivedGroupMessage.getGroup_id(), String.format("开启 %s 功能成功", serviceName));
         } else {
@@ -301,12 +344,12 @@ public class GroupMessageListener {
             groupAIContext = new GroupAIContext(group_id, AiModels.DEEPSEEK_CHAT.getModel());
             groupAIContextMap.put(group_id, groupAIContext);
         }
-
-        if (AiCharacters.validateCharacterName(characterName)) {
-            groupAIContext.setAiCharacters(AiCharacters.getCharacterByName(characterName));
+        AICharacter aiCharacter = aiCharacterService.getAICharacterByDesc(characterName);
+        if (Objects.nonNull(aiCharacter)) {
+            groupAIContext.setAiCharacters(aiCharacter);
             gocqService.send_group_message(receivedGroupMessage.getGroup_id(), String.format("切换人格为 %s 成功", characterName));
         } else {
-            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), String.format("找不到对应人格,当前可用人格有 %s ", AiCharacters.listCharacters()));
+            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), String.format("找不到对应人格,当前可用人格有 %s ", aiCharacterService.getAllAICharacters().stream().map(AICharacter::getCharacter_desc).collect(Collectors.joining(" "))));
         }
     }
 

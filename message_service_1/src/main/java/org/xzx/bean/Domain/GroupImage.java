@@ -1,4 +1,4 @@
-package org.xzx.bean.ImageBean;
+package org.xzx.bean.Domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;

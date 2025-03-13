@@ -3,9 +3,7 @@ package org.xzx.bean.chatBean;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.xzx.bean.enums.AiCharacters;
-import org.xzx.bean.enums.AiModels;
+import org.xzx.bean.Domain.AICharacter;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,7 +15,7 @@ public class GroupAIContext {
     private Long group_id;
     private String aiModel;
     private List<ChatAIRole> context;
-    private AiCharacters aiCharacters;
+    private AICharacter aiCharacters;
     private Date last_query_time;
 
     public GroupAIContext(Long group_id, String aiModel) {
@@ -30,10 +28,10 @@ public class GroupAIContext {
         context.add(role);
         this.context = context;
         this.last_query_time = new Date();
-        this.aiCharacters = AiCharacters.GroupTalker;
+        this.aiCharacters = AICharacter.createDefaultAICharacter();
     }
 
-    public GroupAIContext(Long group_id, String aiModel, AiCharacters aiCharacters) {
+    public GroupAIContext(Long group_id, String aiModel, AICharacter aiCharacters) {
         this.group_id = group_id;
         this.aiModel = aiModel;
         ChatAIRole role = new ChatAIRole();

@@ -4,13 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.xzx.bean.qqGroupBean.GroupInfo;
-import org.xzx.bean.qqGroupBean.GroupService;
 import org.xzx.service.Gocq_service;
 import org.xzx.service.GroupServiceService;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Configuration
 public class GroupServiceConfig {

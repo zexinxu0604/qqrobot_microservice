@@ -3,13 +3,11 @@ package org.xzx.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import lombok.extern.log4j.Log4j2;
-import org.apache.logging.log4j.core.appender.rolling.action.IfAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.xzx.bean.enums.GroupServiceEnum;
-import org.xzx.bean.qqGroupBean.GroupService;
+import org.xzx.bean.Domain.GroupService;
 import org.xzx.dao.GroupServiceDao;
-import org.xzx.utils.CQ_String_Utils;
 
 import java.util.List;
 
@@ -23,7 +21,7 @@ public class GroupServiceService {
     private Gocq_service gocqService;
 
     public boolean insertGroupService(long group_id, String service_name) {
-        return groupServiceDao.insert(new GroupService(group_id, service_name)) == 1;
+        return groupServiceDao.insert(new GroupService(group_id, service_name, 0)) == 1;
     }
 
     public boolean closeGroupService(long group_id, String service_name) {

@@ -1,4 +1,4 @@
-package org.xzx.bean.qqGroupBean;
+package org.xzx.bean.Domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -27,5 +27,11 @@ public class GroupService {
     public GroupService(long group_id, String service_name) {
         this.group_id = group_id;
         this.service_name = service_name;
+    }
+
+    public GroupService(long group_id, String service_name, int status) {
+        this.group_id = group_id;
+        this.service_name = service_name;
+        this.status = status;
     }
 }
