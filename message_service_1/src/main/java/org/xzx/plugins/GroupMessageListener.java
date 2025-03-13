@@ -307,6 +307,10 @@ public class GroupMessageListener {
             gocqService.send_group_message(receivedGroupMessage.getGroup_id(), String.format("找不到%s对应服务", serviceName));
             return;
         }
+        if (groupServiceEnum.equals(GroupServiceEnum.OPEN_SERVICE) || groupServiceEnum.equals(GroupServiceEnum.CLOSE_SERVICE)) {
+            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), String.format("这个关不了捏，关了打不开了捏"));
+            return;
+        }
         groupServiceService.checkServiceStatus(receivedGroupMessage.getGroup_id(), groupServiceEnum);
         if (groupServiceService.openGroupService(receivedGroupMessage.getGroup_id(), groupServiceEnum.getServiceName())) {
             gocqService.send_group_message(receivedGroupMessage.getGroup_id(), String.format("开启 %s 功能成功", serviceName));
