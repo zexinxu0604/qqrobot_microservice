@@ -360,7 +360,7 @@ public class GroupMessageListener {
         aiRole.setRole("system");
         aiRole.setContent(aiCharacter.getCharacterPrompt());
         groupAIContext.setAiCharacters(aiCharacter);
-        groupAIContext.getContext().set(0, aiRole);
+        groupAIContext.getContext().set(1, aiRole);
         gocqService.send_group_message(receivedGroupMessage.getGroup_id(), String.format("切换人格为 %s 成功", characterName));
     }
 

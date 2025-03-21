@@ -35,7 +35,7 @@ public class ChatAIService {
 
         groupAIContext = groupAIContextMap.get(group_id);
         Date now = new Date();
-        if (now.getTime() - groupAIContext.getLast_query_time().getTime() > 1000 * 60 * 5) {
+        if (now.getTime() - groupAIContext.getLast_query_time().getTime() > 1000 * 60 * 3 || groupAIContext.getContext().size() >= 10) {
             groupAIContextMap.put(group_id, new GroupAIContext(group_id, groupAIContext.getAiModel(), groupAIContext.getAiCharacters()));
         }
         String model_name = groupAIContext.getAiModel();
@@ -104,6 +104,7 @@ public class ChatAIService {
         List<ChatCompletionMessageParam> messages = new ArrayList<>();
         ChatAIRole new_role = new ChatAIRole("user", message);
         history_messages.add(new_role);
+        log.info(history_messages.toString());
         for (ChatAIRole chatAIRole : history_messages) {
             if (chatAIRole.getRole().equals("user")) {
                 ChatCompletionUserMessageParam chatCompletionUserMessageParam = ChatCompletionUserMessageParam.builder().content(chatAIRole.getContent()).build();

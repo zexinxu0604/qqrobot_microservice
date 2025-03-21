@@ -26,6 +26,7 @@ public class GroupAIContext {
         role.setRole("system");
         role.setContent("You are a helpful assistant.");
         List<ChatAIRole> context = new LinkedList<>();
+        context.add(ChatAIRole.offlimitRole());
         context.add(role);
         this.context = context;
         this.last_query_time = new Date();
@@ -39,6 +40,7 @@ public class GroupAIContext {
         role.setRole("system");
         role.setContent(aiCharacters.getCharacterPrompt());
         List<ChatAIRole> context = new LinkedList<>();
+        context.add(ChatAIRole.offlimitRole());
         context.add(role);
         this.context = context;
         this.last_query_time = new Date();
