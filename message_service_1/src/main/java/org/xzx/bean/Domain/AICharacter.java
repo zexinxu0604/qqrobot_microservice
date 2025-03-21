@@ -37,6 +37,6 @@ public class AICharacter {
     }
 
     public static AICharacter createDefaultAICharacter() {
-        return new AICharacter(AICharacters.GroupTalker.getName(), AICharacters.GroupTalker.getCharacter());
+        return new AICharacter(AICharacters.GroupAssistant.getName(), AICharacters.GroupAssistant.getCharacter());
     }
 }

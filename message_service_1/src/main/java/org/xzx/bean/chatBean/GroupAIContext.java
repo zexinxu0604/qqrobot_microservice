@@ -7,6 +7,7 @@ import org.xzx.bean.Domain.AICharacter;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 @Data
@@ -24,7 +25,7 @@ public class GroupAIContext {
         ChatAIRole role = new ChatAIRole();
         role.setRole("system");
         role.setContent("You are a helpful assistant.");
-        List<ChatAIRole> context = new ArrayList<>();
+        List<ChatAIRole> context = new LinkedList<>();
         context.add(role);
         this.context = context;
         this.last_query_time = new Date();
@@ -36,8 +37,8 @@ public class GroupAIContext {
         this.aiModel = aiModel;
         ChatAIRole role = new ChatAIRole();
         role.setRole("system");
-        role.setContent("You are a helpful assistant.");
-        List<ChatAIRole> context = new ArrayList<>();
+        role.setContent(aiCharacters.getCharacterPrompt());
+        List<ChatAIRole> context = new LinkedList<>();
         context.add(role);
         this.context = context;
         this.last_query_time = new Date();

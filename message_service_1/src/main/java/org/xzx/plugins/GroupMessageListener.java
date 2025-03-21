@@ -343,18 +343,25 @@ public class GroupMessageListener {
         String message = receivedGroupMessage.getRaw_message();
         String characterName = message.substring(5);
         long group_id = receivedGroupMessage.getGroup_id();
+        AICharacter aiCharacter = aiCharacterService.getAICharacterByDesc(characterName);
         GroupAIContext groupAIContext = groupAIContextMap.get(receivedGroupMessage.getGroup_id());
-        if (groupAIContext == null) {
-            groupAIContext = new GroupAIContext(group_id, AiModels.DEEPSEEK_CHAT.getModel());
+
+        if (Objects.isNull(aiCharacter)) {
+            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), String.format("找不到对应人格,当前可用人格有 %s ", aiCharacterService.getAllAICharacters().stream().map(AICharacter::getCharacterDesc).collect(Collectors.joining(" "))));
+            return;
+        }
+
+        if (Objects.isNull(groupAIContext)) {
+            groupAIContext = new GroupAIContext(group_id, AiModels.DEEPSEEK_CHAT.getModel(), aiCharacter);
             groupAIContextMap.put(group_id, groupAIContext);
         }
-        AICharacter aiCharacter = aiCharacterService.getAICharacterByDesc(characterName);
-        if (Objects.nonNull(aiCharacter)) {
-            groupAIContext.setAiCharacters(aiCharacter);
-            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), String.format("切换人格为 %s 成功", characterName));
-        } else {
-            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), String.format("找不到对应人格,当前可用人格有 %s ", aiCharacterService.getAllAICharacters().stream().map(AICharacter::getCharacterDesc).collect(Collectors.joining(" "))));
-        }
+
+        ChatAIRole aiRole = new ChatAIRole();
+        aiRole.setRole("system");
+        aiRole.setContent(aiCharacter.getCharacterPrompt());
+        groupAIContext.setAiCharacters(aiCharacter);
+        groupAIContext.getContext().set(0, aiRole);
+        gocqService.send_group_message(receivedGroupMessage.getGroup_id(), String.format("切换人格为 %s 成功", characterName));
     }
 
     @RobotListenerHandler(order = 0, regex = "^(模型列表)$")
@@ -364,6 +371,16 @@ public class GroupMessageListener {
         for (AiModels aiModels : AiModels.values()) {
             stringBuilder.append(aiModels.getModel()).append("\n");
         }
+        gocqService.send_group_message(receivedGroupMessage.getGroup_id(), stringBuilder.toString());
+    }
+
+    @RobotListenerHandler(order = 0, regex = "^(人格列表)$")
+    public void listAllCharacters(ReceivedGroupMessage receivedGroupMessage) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("目前的人格有:\n");
+        aiCharacterService.getAllAICharacters().forEach(aiCharacter -> {
+            stringBuilder.append(aiCharacter.getCharacterDesc()).append("\n");
+        });
         gocqService.send_group_message(receivedGroupMessage.getGroup_id(), stringBuilder.toString());
     }
 

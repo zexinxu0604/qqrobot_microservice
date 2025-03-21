@@ -7,7 +7,8 @@ import org.xzx.configs.Constants;
 public enum AICharacters {
     GroupTalker(Constants.GROUP_TALKER_PROMPT, "聊天型人格"),
     GroupDenyer(Constants.GROUP_DENYER_PROMPT, "反驳型人格"),
-    GroupAttacker(Constants.GROUP_ATTACK_PROMPT, "攻击型人格");
+    GroupAttacker(Constants.GROUP_ATTACK_PROMPT, "攻击型人格"),
+    GroupAssistant(Constants.CHAT_SYSTEM_MESSAGE, "助手");
 
     private final String character;
 

@@ -24,4 +24,8 @@ public class AICharacterService {
         QueryWrapper<AICharacter> queryWrapper = new QueryWrapper<>();
         return aiCharacterDao.selectList(queryWrapper);
     }
+
+    public boolean insertAICharacter(AICharacter aiCharacter) {
+        return aiCharacterDao.insert(aiCharacter) == 1;
+    }
 }
