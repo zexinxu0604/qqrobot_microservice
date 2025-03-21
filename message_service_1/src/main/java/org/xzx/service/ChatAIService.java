@@ -78,12 +78,12 @@ public class ChatAIService {
 
             groupAIContext = groupAIContextMap.get(group_id);
 
-            String model_name = AiModels.DEEPSEEK_REASONER.getModel();
+            String model_name = AiModels.DEEPSEEK_CHAT.getModel();
             String baseUrl = aiApiUtils.getChatUrl(model_name);
             String apiKey = aiApiUtils.getAPIKey(model_name);
 
             List<ChatAIRole> history_messages = new ArrayList<>();
-            history_messages.add(new ChatAIRole("system", groupAIContext.getAiCharacters().getCharacter_prompt()));
+            history_messages.add(new ChatAIRole("system", groupAIContext.getAiCharacters().getCharacterPrompt()));
 
             OpenAIClient openAIClient = OpenAIOkHttpClient.builder().baseUrl(baseUrl).apiKey(apiKey).build();
             ChatCompletionCreateParams chatCompletionCreateParams = createChatCompletionParams(model_name, history_messages, message);

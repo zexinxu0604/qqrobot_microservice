@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 import org.xzx.bean.enums.AICharacters;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 
 @TableName("ai_character")
@@ -22,18 +22,18 @@ public class AICharacter {
     private Integer id;
 
     @TableField("character_desc")
-    private String character_desc;
+    private String characterDesc;
 
     @TableField("character_prompt")
-    private String character_prompt;
+    private String characterPrompt;
 
-    public AICharacter(String character_desc, String character_prompt) {
-        this.character_desc = character_desc;
-        this.character_prompt = character_prompt;
+    public AICharacter(String characterDesc, String characterPrompt) {
+        this.characterDesc = characterDesc;
+        this.characterPrompt = characterPrompt;
     }
 
-    public AICharacter(String character_desc) {
-        this.character_desc = character_desc;
+    public AICharacter(String characterDesc) {
+        this.characterDesc = characterDesc;
     }
 
     public static AICharacter createDefaultAICharacter() {

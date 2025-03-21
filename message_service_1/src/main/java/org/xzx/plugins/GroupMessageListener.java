@@ -161,7 +161,7 @@ public class GroupMessageListener {
             message = message.replace(cqString, "");
         }
         if (!message.isEmpty()) {
-            queue.offer(new ChatAIRole(receivedGroupMessage.getSender().getNickname(), message));
+            queue.offer(new ChatAIRole(receivedGroupMessage.getSender().getCard(), message));
         }
         groupMessageStoreQueueMap.put(group_id, queue);
         log.info(queue.toString());
@@ -353,7 +353,7 @@ public class GroupMessageListener {
             groupAIContext.setAiCharacters(aiCharacter);
             gocqService.send_group_message(receivedGroupMessage.getGroup_id(), String.format("切换人格为 %s 成功", characterName));
         } else {
-            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), String.format("找不到对应人格,当前可用人格有 %s ", aiCharacterService.getAllAICharacters().stream().map(AICharacter::getCharacter_desc).collect(Collectors.joining(" "))));
+            gocqService.send_group_message(receivedGroupMessage.getGroup_id(), String.format("找不到对应人格,当前可用人格有 %s ", aiCharacterService.getAllAICharacters().stream().map(AICharacter::getCharacterDesc).collect(Collectors.joining(" "))));
         }
     }
 
